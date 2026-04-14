@@ -19,7 +19,18 @@ export async function POST(req: Request) {
     const events = await prisma.event.findMany({ where: { status: "ACTIVE" }});
     const settings = await prisma.storeSettings.findFirst();
 
-    // 2. Build System Prompt
+    // 2. Format History (Gemini requires alternating roles starting with 'user')
+    // We filter the initial bot message if it's the first one to keep sequence pure user -> model -> user
+    const history = messages
+      .slice(0, -1)
+      .filter((m: any, i: number) => !(i === 0 && m.sender === "bot")) 
+      .map((m: any) => ({
+          role: m.sender === "bot" ? "model" : "user",
+          parts: [{ text: m.text }]
+      }));
+    const lastMessage = messages[messages.length - 1]?.text || "";
+
+    // 3. Build System Prompt
     const systemPrompt = `
 Eres AsombroBot, el asistente inteligente y apasionado de "Asombro Pizza".
 Tu personalidad: ${settings?.botPrompt || "Amable, experto en pizzas de masa madre, divertido y servicial. Usa emojis."}
@@ -68,8 +79,12 @@ MENSAJE DEL USUARIO: ${lastMessage}
 
   } catch (error: any) {
     console.error("Bot Error:", error);
+    const isApiKeyError = error.message.includes("GEMINI_API_KEY") || error.message.includes("API key");
+    
     return NextResponse.json({ 
-        reply: "¡Ups! Mi cerebro de pizza tuvo un pequeño cortocircuito. ¿Podrías repetirme eso? 🍕🔌",
+        reply: isApiKeyError 
+            ? "🔑 ¡Falta mi llave de energía! (Por favor configura GEMINI_API_KEY en Vercel para que pueda hablar)."
+            : "¡Ups! Mi cerebro de pizza tuvo un pequeño cortocircuito. ¿Podrías repetirme eso? 🍕🔌",
         error: error.message 
     }, { status: 500 });
   }
