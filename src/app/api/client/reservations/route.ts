@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     const { date, time, partySize, name, email } = await req.json();
     
     // 0. User Resolution via JWT
-    let finalUserId: string | null = null;
+    let finalUserId: string | undefined = undefined;
     const authHeader = req.headers.get('authorization');
     
     if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
     if (!finalUserId) {
         // Fallback to demo guest from seed if nothing provided
         const demoGuest = await prisma.user.findFirst({ where: { email: "webguest@asombropizza.com" } });
-        finalUserId = demoGuest?.id || null;
+        finalUserId = demoGuest?.id || undefined;
     }
 
     // 4. Create Reservation
