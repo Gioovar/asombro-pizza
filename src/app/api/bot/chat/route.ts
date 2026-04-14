@@ -76,10 +76,13 @@ MENSAJE DEL USUARIO: ${lastMessage}
     console.error("Bot Error:", error);
     const isApiKeyError = error.message.includes("GEMINI_API_KEY") || error.message.includes("API key");
     
+    // Mostramos el error técnico real para diagnosticar
+    const debugMessage = `\n\n(Error técnico: ${error.message})`;
+
     return NextResponse.json({ 
         reply: isApiKeyError 
-            ? "🔑 ¡Falta mi llave de energía! (Por favor configura GEMINI_API_KEY en Vercel para que pueda hablar)."
-            : "¡Ups! Mi cerebro de pizza tuvo un pequeño cortocircuito. ¿Podrías repetirme eso? 🍕🔌",
+            ? "🔑 ¡Falta mi llave de energía! (Asegúrate de haber hecho un New Deployment en Vercel después de agregar la variable)."
+            : "¡Ups! Mi cerebro de pizza tuvo un pequeño cortocircuito. ¿Podrías repetirme eso?" + debugMessage,
         error: error.message 
     }, { status: 500 });
   }
