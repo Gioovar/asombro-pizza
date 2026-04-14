@@ -142,6 +142,19 @@ async function main() {
      ]
   });
 
+  console.log("Configurando la personalidad de AsombroBot...");
+  await prisma.storeSettings.upsert({
+    where: { id: "default" },
+    update: {},
+    create: {
+      id: "default",
+      deliveryFee: 35.0,
+      minOrderTotal: 150.0,
+      botEnabled: true,
+      botPrompt: "Eres AsombroBot, el asistente virtual de Asombro Pizza. Eres amable, usas emojis y siempre intentas ayudar al cliente a pedir su pizza favorita o reservar para eventos."
+    }
+  });
+
   console.log("🚀 SEMBRADO COMPLETADO AL 100%. EL SISTEMA ES AHORA UN UNICORNIO. 🦄");
 }
 

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
       menu: products,
       promos: promos,
       events: await prisma.event.findMany({ where: { status: "ACTIVE" } }),
-      persona: settings?.botPrompt || "Eres un cajero amable."
+      persona: settings?.botPrompt || "Eres AsombroBot, el asistente amable de Asombro Pizza. Ayuda a los clientes con pedidos y eventos usando emojis."
     };
 
     // --- MOCK OPENAI FUNCTION CALLING RESPONSES ---
