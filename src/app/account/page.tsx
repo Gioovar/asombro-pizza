@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../store/useAuth";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Calendar, Ticket, User, MapPin, CreditCard, LogOut, ChevronRight, QrCode } from "lucide-react";
+import { Calendar, Ticket, User, MapPin, CreditCard, LogOut, ChevronRight, QrCode, ShoppingBag } from "lucide-react";
 import { QRCode } from "../../components/common/QRCode";
 
 export default function AccountPage() {
