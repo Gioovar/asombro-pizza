@@ -93,6 +93,7 @@ model StoreSettings {
   minOrderTotal Float    @default(150.0)
   botEnabled    Boolean  @default(true)
   botPrompt     String   @default("Eres AsombroBot, asistente de pizzería. Sé amable.")
+  openingHours  String?  @default("{\"mon\":{\"open\":\"13:00\",\"close\":\"23:00\"},\"tue\":{\"open\":\"13:00\",\"close\":\"23:00\"},\"wed\":{\"open\":\"13:00\",\"close\":\"23:00\"},\"thu\":{\"open\":\"13:00\",\"close\":\"23:00\"},\"fri\":{\"open\":\"13:00\",\"close\":\"23:00\"},\"sat\":{\"open\":\"13:00\",\"close\":\"23:00\"},\"sun\":{\"open\":\"13:00\",\"close\":\"23:00\"}}")
   updatedAt     DateTime @updatedAt
 }
 
@@ -163,12 +164,13 @@ model Ticket {
 
 model Reservation {
   id        String   @id @default(cuid())
-  eventId   String
-  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId   String?
+  event     Event?    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   partySize Int
   time      String
+  date      DateTime @default(now())
   status    String   @default("CONFIRMED") // CONFIRMED, COMPLETED, NO_SHOW
   createdAt DateTime @default(now())
 }

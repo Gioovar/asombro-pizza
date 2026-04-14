@@ -8,6 +8,7 @@ import { pizzasData, Pizza } from "../data/pizzas";
 import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 import { useCartStore } from "../store/useCartStore";
+import { ReservationModal } from "./ReservationModal";
 
 // Register ScrollTrigger
 if (typeof window !== "undefined") {
@@ -20,6 +21,7 @@ export function Hero() {
   const pizzasRef = useRef<HTMLDivElement>(null);
   
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isReservationOpen, setIsReservationOpen] = useState(false);
   const { addItem } = useCartStore();
 
   useEffect(() => {
@@ -80,7 +82,12 @@ export function Hero() {
             <a href="#menu" className="hover:text-black hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300">Menú</a>
             <a href="#promos" className="hover:text-[var(--color-brand-orange)] hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300 font-bold bg-white/60 shadow-sm">Promociones 🔥</a>
             <a href="#events" className="hover:text-[var(--color-purple-600)] text-purple-600 hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300 font-bold">Eventos 🎟️</a>
-            <a href="#events" className="hover:text-black hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300">Reserva 🍽️</a>
+            <button 
+              onClick={() => setIsReservationOpen(true)}
+              className="hover:text-black hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300"
+            >
+              Reserva 🍽️
+            </button>
             <a href="#nosotros" className="hover:text-black hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300">Nuestra Masa</a>
           </nav>
         </header>
@@ -186,6 +193,10 @@ export function Hero() {
         </div>
       </div>
 
+      <ReservationModal 
+        isOpen={isReservationOpen} 
+        onClose={() => setIsReservationOpen(false)} 
+      />
     </section>
   );
 }
