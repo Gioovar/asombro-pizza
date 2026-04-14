@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  image       String
+  cost        Float
+  price       Float
+  category    String   @default("Pizza")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  
+  // --- Fintech & User Identity Relations ---
+  userId       String?
+  user         User?       @relation(fields: [userId], references: [id])
+  addressId    String?
+  addressRel   Address?    @relation(fields: [addressId], references: [id])
+  paymentId    String?
+  paymentRel   PaymentMethod? @relation(fields: [paymentId], references: [id])
+
+  // --- Legacy / Anonymous Fallback ---
+  customerName String?
+  address      String?
+  
+  // --- Financial & Fulfillment ---
+  status       String      @default("NEW") // NEW, PREPARING, READY, ON_WAY, DELIVERED, CANCELLED
+  total        Float
+  tip          Float       @default(0.0)   // Propina explícita para la orden
+  payment      String      @default("CASH")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  
+  driverId     String?
+  driver       Driver?     @relation(fields: [driverId], references: [id])
+  
+  items        OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+  price     Float
+}
+
+model Driver {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  vehicle   String
+  status    String   @default("AVAILABLE") // AVAILABLE, BUSY, OFFLINE
+  createdAt DateTime @default(now())
+  
+  orders    Order[]
+}
+
+model Promo {
+  id          String   @id @default(cuid())
+  title       String
+  code        String   @unique
+  description String
+  imageUrl    String?  // Visual banner for the slider
+  badgeText   String?  // Ej: "🔥 Más popular"
+  discount    Float    // percentage or flat amount
+  type        String   @default("PERCENTAGE") // PERCENTAGE, FLAT, COMBO, TWO_FOR_ONE
+  active      Boolean  @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model StoreSettings {
+  id            String   @id @default("default")
+  deliveryFee   Float    @default(35.0)
+  minOrderTotal Float    @default(150.0)
+  botEnabled    Boolean  @default(true)
+  botPrompt     String   @default("Eres AsombroBot, asistente de pizzería. Sé amable.")
+  updatedAt     DateTime @updatedAt
+}
+
+// ----------------------------------------------------
+// FINTECH & IDENTITY MODULE (FASE 4)
+// ----------------------------------------------------
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  password  String
+  avatar    String?
+  createdAt DateTime @default(now())
+  
+  addresses Address[]
+  payments  PaymentMethod[]
+  orders    Order[]
+  tickets       Ticket[]
+  reservations  Reservation[]
+}
+
+model Address {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  alias     String  @default("Casa") // Casa, Trabajo, Otro
+  fullPath  String
+  ref       String?
+  lat       Float?
+  lng       Float?
+  isDefault Boolean @default(false)
+  orders    Order[]
+}
+
+// ----------------------------------------------------
+// HOSPITALITY & ENTERTAINMENT MODULE (FASE 5)
+// ----------------------------------------------------
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  imageUrl    String
+  date        DateTime
+  capacity    Int
+  price       Float    // Si es 0, es cover gratis
+  category    String   @default("Fiesta") // Fiesta, Musica, Stand-up
+  status      String   @default("ACTIVE") // ACTIVE, CANCELLED, DONE
+  createdAt   DateTime @default(now())
+  
+  tickets       Ticket[]
+  reservations  Reservation[]
+}
+
+model Ticket {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   @default("GENERAL") // GENERAL, VIP
+  price     Float
+  status    String   @default("VALID") // VALID, USED, SCANNED
+  createdAt DateTime @default(now())
+}
+
+model Reservation {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  partySize Int
+  time      String
+  status    String   @default("CONFIRMED") // CONFIRMED, COMPLETED, NO_SHOW
+  createdAt DateTime @default(now())
+}
+
+model PaymentMethod {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String  // CARD, CASH
+  last4     String? // Solo últimos 4 digitos compliance PCI
+  provider  String? // Stripe, MercadoPago, etc
+  isDefault Boolean @default(false)
+
+  orders    Order[]
+}
