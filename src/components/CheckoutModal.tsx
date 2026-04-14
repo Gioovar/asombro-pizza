@@ -50,7 +50,10 @@ export function CheckoutModal() {
 
       await fetch("/api/client/checkout", {
          method: "POST",
-         headers: { "Content-Type" : "application/json" },
+         headers: { 
+            "Content-Type" : "application/json",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {})
+         },
          body: JSON.stringify({
             items,
             total: getTotalPrice(),

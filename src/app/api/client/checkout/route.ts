@@ -1,11 +1,27 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || "fallback_super_secret_asombro_key_2026";
 
 export async function POST(req: Request) {
   try {
-    const { items, total, userId, address, tip, paymentType } = await req.json();
+    const { items, total, address, tip, paymentType } = await req.json();
+    
+    // 0. User Resolution via JWT
+    let finalUserId: string | null = null;
+    const authHeader = req.headers.get('authorization');
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+        finalUserId = decoded.userId;
+      } catch (e) {
+        console.warn("Invalid token in checkout attempt");
+      }
+    }
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "No items in cart" }, { status: 400 });
@@ -14,8 +30,8 @@ export async function POST(req: Request) {
     // Creating order and connecting order items
     const order = await prisma.order.create({
       data: {
-        userId: userId || null,
-        customerName: userId ? undefined : "Invitado " + Math.floor(Math.random() * 1000),
+        userId: finalUserId,
+        customerName: finalUserId ? undefined : "Invitado " + Math.floor(Math.random() * 1000),
         address: address || "Mostrador Web",
         tip: tip || 0.0,
         status: "NEW",

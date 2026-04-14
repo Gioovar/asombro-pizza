@@ -12,7 +12,7 @@ export default function AccountPage() {
   const router = useRouter();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"reservations" | "tickets" | "profile">("reservations");
+  const [activeTab, setActiveTab] = useState<"reservations" | "tickets" | "profile" | "orders">("reservations");
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -70,6 +70,12 @@ export default function AccountPage() {
                          <Calendar size={18} /> Mis Mesas
                       </button>
                       <button 
+                        onClick={() => setActiveTab("orders")}
+                        className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all ${activeTab === "orders" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "text-gray-500 hover:bg-gray-50"}`}
+                      >
+                         <ShoppingBag size={18} /> Historial Pedidos
+                      </button>
+                      <button 
                         onClick={() => setActiveTab("tickets")}
                         className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all ${activeTab === "tickets" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "text-gray-500 hover:bg-gray-50"}`}
                       >
@@ -121,6 +127,49 @@ export default function AccountPage() {
                                      <div className="text-center">
                                         <QRCode data={`RES|${res.id}|${res.date}`} size={120} />
                                         <p className="text-[10px] font-black uppercase tracking-tighter text-gray-400 mt-2">Muestra este QR al llegar</p>
+                                     </div>
+                                  </div>
+                               ))}
+                            </div>
+                         )}
+                      </div>
+                   )}
+
+                   {activeTab === "orders" && (
+                      <div className="space-y-6">
+                         <h3 className="text-3xl font-black font-poppins">Mis Pedidos 🍕</h3>
+                         {userData?.orders?.length === 0 ? (
+                            <div className="bg-white/50 border-2 border-dashed border-gray-200 rounded-[2.5rem] p-12 text-center">
+                               <p className="text-gray-400 font-bold">Aún no has pedido ninguna pizza.</p>
+                               <button onClick={() => router.push("/#menu")} className="mt-4 text-indigo-600 font-bold">Ver el Menú</button>
+                            </div>
+                         ) : (
+                            <div className="grid grid-cols-1 gap-4">
+                               {userData?.orders?.map((order: any) => (
+                                  <div key={order.id} className="bg-white rounded-3xl p-6 border border-white/50 shadow-sm">
+                                     <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                           <p className="text-[10px] font-black uppercase text-gray-400">Orden #{order.id.slice(-6)}</p>
+                                           <p className="font-bold text-sm text-gray-600">{new Date(order.createdAt).toLocaleString()}</p>
+                                        </div>
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                                           order.status === 'DELIVERED' ? 'bg-green-100 text-green-700' : 
+                                           order.status === 'CANCELLED' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
+                                        }`}>
+                                           {order.status}
+                                        </span>
+                                     </div>
+                                     <div className="space-y-2 mb-4 border-t border-gray-50 pt-4">
+                                        {order.items.map((item: any) => (
+                                           <div key={item.id} className="flex justify-between text-sm">
+                                              <span className="text-gray-500"><span className="font-bold text-black">{item.quantity}x</span> {item.product.name}</span>
+                                              <span className="font-bold">${item.price * item.quantity}</span>
+                                           </div>
+                                        ))}
+                                     </div>
+                                     <div className="flex justify-between items-center border-t border-gray-50 pt-4 font-black">
+                                        <span>Total</span>
+                                        <span className="text-xl text-indigo-600">${order.total} MXN</span>
                                      </div>
                                   </div>
                                ))}

@@ -58,6 +58,12 @@ export async function POST(req: Request, context: { params: Promise<{ action: st
                 tickets: {
                     include: { event: true },
                     orderBy: { createdAt: 'desc' }
+                },
+                orders: {
+                    include: { 
+                        items: { include: { product: true } } 
+                    },
+                    orderBy: { createdAt: 'desc' }
                 }
             }
          });
