@@ -81,7 +81,7 @@ export async function POST(req: Request) {
     if (!finalUserId) {
         // Fallback to demo guest from seed if nothing provided
         const demoGuest = await prisma.user.findFirst({ where: { email: "webguest@asombropizza.com" } });
-        finalUserId = demoGuest?.id;
+        finalUserId = demoGuest?.id || null;
     }
 
     // 4. Create Reservation
