@@ -56,15 +56,13 @@ export function Hero() {
         }
       }
     });
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-    }
-
     const handleOpenRes = () => setIsReservationOpen(true);
     window.addEventListener("open-reservation", handleOpenRes);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
 
     return () => {
       pin.kill();

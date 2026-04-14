@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { askGemini } from "../../../lib/gemini";
+import { askGemini } from "@/lib/gemini";
 
 const prisma = new PrismaClient();
 
