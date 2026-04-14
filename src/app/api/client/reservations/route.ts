@@ -13,14 +13,15 @@ export async function POST(req: Request) {
 
     // 1. Get Opening Hours
     const settings = await prisma.storeSettings.findFirst();
+    // Default to the hours shown in the dashboard (11:00 - 23:00) and Closed on Sunday
     const openingHours = settings?.openingHours ? JSON.parse(settings.openingHours) : {
-      mon: { open: "13:00", close: "23:00" },
-      tue: { open: "13:00", close: "23:00" },
-      wed: { open: "13:00", close: "23:00" },
-      thu: { open: "13:00", close: "23:00" },
-      fri: { open: "13:00", close: "23:00" },
-      sat: { open: "13:00", close: "23:00" },
-      sun: { open: "13:00", close: "23:00" },
+      mon: { open: "11:00", close: "23:00" },
+      tue: { open: "11:00", close: "23:00" },
+      wed: { open: "11:00", close: "23:00" },
+      thu: { open: "11:00", close: "23:00" },
+      fri: { open: "11:00", close: "23:00" },
+      sat: { open: "11:00", close: "23:00" },
+      sun: { closed: true },
     };
 
     // 2. Validate Opening Hours

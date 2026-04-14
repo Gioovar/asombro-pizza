@@ -77,6 +77,7 @@ export function AiChatbot() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: newMessages, userId: "browser" })
       });
+      const data = await response.json();
       setIsTyping(false);
       const replyBody = data.reply || data.error || "Lo siento, mi conexión está un poco lenta. ¿Podrías intentar de nuevo?";
       setMessages(prev => [...prev, { id: Date.now().toString(), sender: "bot", text: replyBody }]);
