@@ -7,11 +7,6 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   try {
     const { messages, userId } = await req.json();
-    const history = messages.slice(0, -1).map((m: any) => ({
-        role: m.sender === "bot" ? "model" : "user",
-        parts: [{ text: m.text }]
-    }));
-    const lastMessage = messages[messages.length - 1]?.text || "";
 
     // 1. Fetch RAG Context
     const products = await prisma.product.findMany({ select: { id: true, name: true, price: true, category: true, description: true }});
