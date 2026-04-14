@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   try {
     const { messages, userId } = await req.json();
-    const lastMessage = messages[messages.length - 1]?.content.toLowerCase() || "";
+    const lastMessage = messages[messages.length - 1]?.text.toLowerCase() || "";
 
     // RAG (Retrieval-Augmented Generation)
     // 1. Fetch available Menu
