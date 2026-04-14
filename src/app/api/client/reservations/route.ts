@@ -87,7 +87,7 @@ export async function POST(req: Request) {
     // 4. Create Reservation
     const reservation = await prisma.reservation.create({
       data: {
-        userId: finalUserId,
+        user: { connect: { id: finalUserId as string } },
         partySize: parseInt(partySize),
         time: time,
         date: new Date(date),
