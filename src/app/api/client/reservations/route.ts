@@ -1,11 +1,27 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || "fallback_super_secret_asombro_key_2026";
 
 export async function POST(req: Request) {
   try {
-    const { date, time, partySize, userId, name, email } = await req.json();
+    const { date, time, partySize, name, email } = await req.json();
+    
+    // 0. User Resolution via JWT
+    let finalUserId: string | null = null;
+    const authHeader = req.headers.get('authorization');
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+        finalUserId = decoded.userId;
+      } catch (e) {
+        console.warn("Invalid token in reservation attempt");
+      }
+    }
 
     if (!date || !time || !partySize) {
       return NextResponse.json({ error: "Faltan datos requeridos" }, { status: 400 });
@@ -45,8 +61,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: `Horario no disponible. Abrimos de ${dayConfig.open} a ${dayConfig.close}` }, { status: 400 });
     }
 
-    // 3. User Resolution (Use provided userId or find/create guest by email)
-    let finalUserId = userId;
+    // 3. User Resolution Fallback (Find/Create by email if no JWT)
     if (!finalUserId && email) {
         const user = await prisma.user.findUnique({ where: { email } });
         if (user) {

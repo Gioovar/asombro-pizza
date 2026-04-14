@@ -4,29 +4,35 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, CalendarDays, Ticket, Users, CheckCircle, CreditCard } from "lucide-react";
 import Image from "next/image";
-import { useUserStore } from "../../store/useUserStore";
+import { useAuth } from "../../store/useAuth";
+import { AuthModal } from "../auth/AuthModal";
 
 export function EventModal({ event, onClose }: { event: any, onClose: () => void }) {
   const [mode, setMode] = useState<"SELECT" | "BUY_TICKET" | "RESERVE_TABLE" | "SUCCESS">("SELECT");
   const [partySize, setPartySize] = useState(2);
   const [isProcessing, setIsProcessing] = useState(false);
-  const { user } = useUserStore();
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const { user, token, isAuthenticated } = useAuth();
 
-  const handleAction = async (actionStr: "TICKET" | "TABLE") => {
-     setIsProcessing(true);
+     if (!isAuthenticated()) {
+        setIsAuthOpen(true);
+        setIsProcessing(false);
+        return;
+     }
      
      try {
-       await fetch("/api/client/events/book", {
+       const res = await fetch("/api/client/events/book", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+          },
           body: JSON.stringify({
-             actionType: actionStr,
              eventId: event.id,
-             userId: user?.id,
-             partySize: partySize,
-             price: event.price
+             type: actionStr === "TABLE" ? "TABLE_RESERVATION" : "GENERAL"
           })
        });
+       if (!res.ok) throw new Error("Booking failed");
      } catch (error) {
        console.error("Booking failed:", error);
      }
@@ -188,6 +194,7 @@ export function EventModal({ event, onClose }: { event: any, onClose: () => void
           </div>
         </motion.div>
       </motion.div>
+      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </AnimatePresence>
   );
 }

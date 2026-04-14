@@ -39,7 +39,10 @@ export function ReservationModal({ isOpen, onClose }: ReservationModalProps) {
     try {
       const response = await fetch("/api/client/reservations", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({
           date,
           time,

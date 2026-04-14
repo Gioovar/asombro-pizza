@@ -1,54 +1,68 @@
-import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || "fallback_super_secret_asombro_key_2026";
 
 export async function POST(req: Request) {
   try {
-    const { actionType, eventId, userId, partySize, price, ticketType } = await req.json();
-
-    if (!eventId) {
-      return NextResponse.json({ error: "No event ID provided" }, { status: 400 });
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Debes iniciar sesión para comprar boletos" }, { status: 401 });
     }
 
-    let targetUserId = userId;
-    if (!targetUserId) {
-        // Find or create fallback guest user instantly to satisfy DB relations
-        let guest = await prisma.user.findFirst({ where: { email: "webguest@asombropizza.com" }});
-        if (!guest) guest = await prisma.user.create({ data: { name: "Invitado Web", email: "webguest@asombropizza.com", password: "encrypted_123" } });
-        targetUserId = guest.id;
+    const token = authHeader.split(" ")[1];
+    let userId: string;
+
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+      userId = decoded.userId;
+    } catch (e) {
+      return NextResponse.json({ error: "Sesión inválida" }, { status: 401 });
     }
 
-    // MODO A: Mesa de Restaurante
-    if (actionType === "TABLE") {
-       const reservation = await prisma.reservation.create({
-          data: {
-             eventId,
-             userId: targetUserId, // Temporal ID for testing without Auth barrier
-             partySize: partySize || 2,
-             time: new Date().toLocaleTimeString(),
-             status: "CONFIRMED"
-          }
-       });
-       return NextResponse.json({ success: true, reservation });
+    const { eventId, type = "GENERAL" } = await req.json();
+
+    const event = await prisma.event.findUnique({
+      where: { id: eventId }
+    });
+
+    if (!event) {
+      return NextResponse.json({ error: "Evento no encontrado" }, { status: 404 });
     }
 
-    // MODO B: Taquilla de Entrada
-    if (actionType === "TICKET") {
-       const ticket = await prisma.ticket.create({
-          data: {
-             eventId,
-             userId: targetUserId,
-             type: ticketType || "GENERAL",
-             price: price || 0,
-             status: "VALID"
-          }
-       });
-       return NextResponse.json({ success: true, ticket });
+    // Check capacity
+    const ticketCount = await prisma.ticket.count({
+      where: { eventId }
+    });
+
+    if (ticketCount >= event.capacity) {
+      return NextResponse.json({ error: "Agotado: No hay más boletos disponibles" }, { status: 400 });
     }
 
-  } catch (error) {
-    console.error("Booking API Error:", error);
-    return NextResponse.json({ error: "Failed to process booking" }, { status: 500 });
+    // Create Ticket
+    const ticket = await prisma.ticket.create({
+      data: {
+        eventId,
+        userId,
+        type,
+        price: event.price,
+        status: "VALID"
+      },
+      include: {
+          event: true
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "¡Boleto adquirido con éxito!",
+      ticket
+    });
+
+  } catch (error: any) {
+    console.error("Booking Error:", error);
+    return NextResponse.json({ error: "Error al procesar la compra" }, { status: 500 });
   }
 }

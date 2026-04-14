@@ -6,9 +6,12 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { pizzasData, Pizza } from "../data/pizzas";
 import Image from "next/image";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, User as UserIcon } from "lucide-react";
 import { useCartStore } from "../store/useCartStore";
 import { ReservationModal } from "./ReservationModal";
+import { AuthModal } from "./auth/AuthModal";
+import { useAuth } from "../store/useAuth";
+import Link from "next/link";
 
 // Register ScrollTrigger
 if (typeof window !== "undefined") {
@@ -22,6 +25,9 @@ export function Hero() {
   
   const [activeIndex, setActiveIndex] = useState(0);
   const [isReservationOpen, setIsReservationOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  
+  const { user, isAuthenticated } = useAuth();
   const { addItem } = useCartStore();
 
   useEffect(() => {
@@ -89,6 +95,19 @@ export function Hero() {
               Reserva 🍽️
             </button>
             <a href="#nosotros" className="hover:text-black hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300">Nuestra Masa</a>
+            
+            {isAuthenticated() ? (
+              <Link href="/account" className="flex items-center gap-2 bg-black text-white px-5 py-2 rounded-full hover:bg-indigo-600 transition-all font-bold shadow-lg">
+                <UserIcon size={16} /> Mi Cuenta
+              </Link>
+            ) : (
+              <button 
+                onClick={() => setIsAuthOpen(true)}
+                className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2 rounded-full hover:bg-indigo-700 transition-all font-bold shadow-lg shadow-indigo-200"
+              >
+                <UserIcon size={16} /> Ingresar
+              </button>
+            )}
           </nav>
         </header>
 
@@ -196,6 +215,11 @@ export function Hero() {
       <ReservationModal 
         isOpen={isReservationOpen} 
         onClose={() => setIsReservationOpen(false)} 
+      />
+
+      <AuthModal 
+        isOpen={isAuthOpen} 
+        onClose={() => setIsAuthOpen(false)} 
       />
     </section>
   );

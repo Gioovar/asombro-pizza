@@ -49,7 +49,17 @@ export async function POST(req: Request, context: { params: Promise<{ action: st
          const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
          const user = await prisma.user.findUnique({ 
             where: { id: decoded.userId },
-            include: { addresses: true, payments: true }
+            include: { 
+                addresses: true, 
+                payments: true,
+                reservations: {
+                    orderBy: { date: 'desc' }
+                },
+                tickets: {
+                    include: { event: true },
+                    orderBy: { createdAt: 'desc' }
+                }
+            }
          });
          if (!user) throw new Error("Not found");
          return NextResponse.json({ user });
