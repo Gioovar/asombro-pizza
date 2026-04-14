@@ -75,6 +75,22 @@ export async function POST(req: Request) {
        }
     }
     
+    // 4. Recommendation Logic
+    if (lastMessage.includes("recomiendas") || lastMessage.includes("recomienda") || lastMessage.includes("sugieres") || lastMessage.includes("qué hay")) {
+        const topPizza = products[Math.floor(Math.random() * products.length)];
+        return NextResponse.json({
+            reply: `¡Te recomiendo muchísimo nuestra *${topPizza?.name || 'Pizza Especial'}*! Es de las favoritas. También tenemos opciones de ${products.slice(0,3).map(p => p.name).join(", ")}. ¿Te gustaría que te agregue una al carrito? 🍕`
+        });
+    }
+
+    // 5. Generic Pizza / Menu query
+    if (lastMessage.includes("pizza") || lastMessage.includes("menú") || lastMessage.includes("comer")) {
+        const menuList = products.map(p => `• *${p.name}* ($${p.price})`).join("\n");
+        return NextResponse.json({
+            reply: `¡Claro! Aquí tienes nuestras pizzas listas para salir del horno:\n\n${menuList}\n\n¿Cuál se te antoja hoy? 😋`
+        });
+    }
+
     if (lastMessage.includes("pagar") || lastMessage.includes("confirmar") || lastMessage.includes("listo")) {
        return NextResponse.json({
            reply: "¡Excelente! Procesando tu orden... Ve al botón rojo de 'Proceder al Pago' para finalizar.",
@@ -82,9 +98,9 @@ export async function POST(req: Request) {
        });
     }
 
-    // Default Fallback Fake LLM
+    // Default Fallback with Persona
     return NextResponse.json({
-       reply: "Entiendo. Sin embargo soy un asistente simulado en esta demo. Pídeme 'promociones', 'quiero una hawaiana', o pregúntame por 'eventos' para ver mis poderes SaaS."
+       reply: "¡Mmm, no estoy seguro de haber entendido eso! Pero puedo ayudarte a pedir una pizza (prueba con 'Hawaiana' o 'Pepperoni'), mostrarte nuestras 'promociones' o decirte qué 'eventos' tenemos hoy. 🍕✨"
     });
 
   } catch (error) {
