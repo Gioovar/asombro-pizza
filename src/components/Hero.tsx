@@ -57,9 +57,19 @@ export function Hero() {
       }
     });
 
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    const handleOpenRes = () => setIsReservationOpen(true);
+    window.addEventListener("open-reservation", handleOpenRes);
+
     return () => {
       pin.kill();
       ScrollTrigger.getAll().forEach(t => t.kill());
+      window.removeEventListener("open-reservation", handleOpenRes);
     };
   }, []);
 

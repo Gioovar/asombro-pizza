@@ -1,110 +1,76 @@
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { askGemini } from "../../../lib/gemini";
 
 const prisma = new PrismaClient();
 
-// This is the Brain of AsombroBot. 
 export async function POST(req: Request) {
   try {
     const { messages, userId } = await req.json();
-    const lastMessage = messages[messages.length - 1]?.text.toLowerCase() || "";
+    const history = messages.slice(0, -1).map((m: any) => ({
+        role: m.sender === "bot" ? "model" : "user",
+        parts: [{ text: m.text }]
+    }));
+    const lastMessage = messages[messages.length - 1]?.text || "";
 
-    // RAG (Retrieval-Augmented Generation)
-    // 1. Fetch available Menu
-    const products = await prisma.product.findMany({ select: { id: true, name: true, price: true, category: true }});
-    // 2. Fetch Active Promos
+    // 1. Fetch RAG Context
+    const products = await prisma.product.findMany({ select: { id: true, name: true, price: true, category: true, description: true }});
     const promos = await prisma.promo.findMany({ where: { active: true }});
-    // 3. Fetch specific Bot instructions from settings
+    const events = await prisma.event.findMany({ where: { status: "ACTIVE" }});
     const settings = await prisma.storeSettings.findFirst();
 
-    // RAG Payload Generation (This is what you'd feed to GPT-4 as an initial System Prompt)
-    const storeContext = {
-      menu: products,
-      promos: promos,
-      events: await prisma.event.findMany({ where: { status: "ACTIVE" } }),
-      persona: settings?.botPrompt || "Eres AsombroBot, el asistente amable de Asombro Pizza. Ayuda a los clientes con pedidos y eventos usando emojis."
-    };
+    // 2. Build System Prompt
+    const systemPrompt = `
+Eres AsombroBot, el asistente inteligente y apasionado de "Asombro Pizza".
+Tu personalidad: ${settings?.botPrompt || "Amable, experto en pizzas de masa madre, divertido y servicial. Usa emojis."}
 
-    // --- MOCK OPENAI FUNCTION CALLING RESPONSES ---
-    await new Promise(r => setTimeout(r, 1200)); // Simulate LLM Latency
+MENÚ ACTUAL:
+${products.map(p => `- ${p.name} ($${p.price}): ${p.description}`).join("\n")}
 
-    // NEW LOGIC: Event Routing
-    if (lastMessage.includes("evento") || lastMessage.includes("cartelera") || lastMessage.includes("boletos")) {
-       const activeEvents = storeContext.events.map(e => `*${e.title}*`).join(", ");
-       return NextResponse.json({
-          reply: `¡Tenemos eventos increíbles! Próximamente: ${activeEvents || 'Ninguno programado'}. Dime si quieres 'comprar boletos' o 'reservar mesa'.`
-       });
+PROMOCIONES:
+${promos.map(p => `- ${p.title}: ${p.description}`).join("\n")}
+
+EVENTOS PRÓXIMOS:
+${events.map(e => `- ${e.title} (${new Date(e.date).toLocaleDateString()}): ${e.description}`).join("\n")}
+
+REGLAS CRÍTICAS:
+1. Solo recomienda productos que estén en el menú de arriba.
+2. Si el cliente quiere reservar una mesa o ver disponibilidad, responde normalmente pero incluye al final el código exacto: [[ACTION_RESERVE]].
+3. Si el cliente quiere pagar, confirmar su carrito o finalizar su pedido, responde normalmente e incluye al final: [[ACTION_CHECKOUT]].
+4. Si el cliente pregunta por un evento específico o comprar boletos, incluye: [[ACTION_EVENTS]].
+5. Sé breve y conversacional.
+
+MENSAJE DEL USUARIO: ${lastMessage}
+`;
+
+    // 3. Get AI Response
+    const aiReply = await askGemini(systemPrompt, history);
+
+    // 4. Detect System Actions
+    let systemAction = null;
+    let cleanReply = aiReply;
+
+    if (aiReply.includes("[[ACTION_RESERVE]]")) {
+        systemAction = { type: "OPEN_RESERVATION" };
+        cleanReply = cleanReply.replace("[[ACTION_RESERVE]]", "").trim();
+    } else if (aiReply.includes("[[ACTION_CHECKOUT]]")) {
+        systemAction = { type: "OPEN_CHECKOUT" };
+        cleanReply = cleanReply.replace("[[ACTION_CHECKOUT]]", "").trim();
+    } else if (aiReply.includes("[[ACTION_EVENTS]]")) {
+        systemAction = { type: "OPEN_EVENT_MODAL" };
+        cleanReply = cleanReply.replace("[[ACTION_EVENTS]]", "").trim();
     }
 
-    if (lastMessage.includes("reservar") || lastMessage.includes("mesa")) {
-       return NextResponse.json({
-          reply: `¡Excelente! Te abrí la ventana para que elijas cuántas personas son y apartes tu mesa sin costo.`,
-          system_action: { type: "OPEN_EVENT_MODAL" } // We will listen to this in frontend
-       });
-    }
-
-    if (lastMessage.includes("comprar") && (lastMessage.includes("boleto") || lastMessage.includes("ticket") || lastMessage.includes("entrada"))) {
-       return NextResponse.json({
-          reply: `¡Perfecto! Te estoy enviando a la terminal de pago de nuestro próximo Evento. Selecciona tu ticket y procede con la tarjeta.`,
-          system_action: { type: "OPEN_EVENT_MODAL" }
-       });
-    }
-
-    // Fake NLP Routing rules based on the injected context
-    if (lastMessage.includes("promociones") || lastMessage.includes("ofertas") || lastMessage.includes("descuentos")) {
-       const activeTitles = promos.map(p => `*${p.title}* (${p.type === 'PERCENTAGE' ? p.discount+'%' : p.discount})`).join(", ");
-       return NextResponse.json({
-          reply: `¡Claro! Hoy tenemos estas joyitas: ${activeTitles || 'Por ahora nada'}. ¿Te sirvo algo?`
-       });
-    }
-
-    if (lastMessage.includes("hawaiana") || lastMessage.includes("piña")) {
-       const hawaiana = products.find(p => p.name.toLowerCase().includes("hawaiana"));
-       if (!hawaiana) return NextResponse.json({ reply: "¡Ay! Por el momento se nos agotó la Hawaiana. ¿Quisieras la de Pepperoni?" });
-       
-       if (lastMessage.includes("quiero") || lastMessage.includes("dame") || lastMessage.includes("agrega")) {
-          return NextResponse.json({
-            reply: `¡Entendido! Una Hawaiana de camino a tu carrito. 🛒 ¿Gustas agregar un refresco o confirmo tu pedido?`,
-            system_action: {
-               type: "ADD_TO_CART",
-               items: [hawaiana]
-            }
-          });
-       } else {
-          return NextResponse.json({ reply: `¡La Hawaiana cuesta $${hawaiana.price} MXN y es deliciosa! ¿Te la pongo en el carrito?` });
-       }
-    }
-    
-    // 4. Recommendation Logic
-    if (lastMessage.includes("recomiendas") || lastMessage.includes("recomienda") || lastMessage.includes("sugieres") || lastMessage.includes("qué hay")) {
-        const topPizza = products[Math.floor(Math.random() * products.length)];
-        return NextResponse.json({
-            reply: `¡Te recomiendo muchísimo nuestra *${topPizza?.name || 'Pizza Especial'}*! Es de las favoritas. También tenemos opciones de ${products.slice(0,3).map(p => p.name).join(", ")}. ¿Te gustaría que te agregue una al carrito? 🍕`
-        });
-    }
-
-    // 5. Generic Pizza / Menu query
-    if (lastMessage.includes("pizza") || lastMessage.includes("menú") || lastMessage.includes("comer")) {
-        const menuList = products.map(p => `• *${p.name}* ($${p.price})`).join("\n");
-        return NextResponse.json({
-            reply: `¡Claro! Aquí tienes nuestras pizzas listas para salir del horno:\n\n${menuList}\n\n¿Cuál se te antoja hoy? 😋`
-        });
-    }
-
-    if (lastMessage.includes("pagar") || lastMessage.includes("confirmar") || lastMessage.includes("listo")) {
-       return NextResponse.json({
-           reply: "¡Excelente! Procesando tu orden... Ve al botón rojo de 'Proceder al Pago' para finalizar.",
-           system_action: { type: "OPEN_CHECKOUT" }
-       });
-    }
-
-    // Default Fallback with Persona
     return NextResponse.json({
-       reply: "¡Mmm, no estoy seguro de haber entendido eso! Pero puedo ayudarte a pedir una pizza (prueba con 'Hawaiana' o 'Pepperoni'), mostrarte nuestras 'promociones' o decirte qué 'eventos' tenemos hoy. 🍕✨"
+        reply: cleanReply,
+        system_action: systemAction
     });
 
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Brain malfunction" }, { status: 500 });
+  } catch (error: any) {
+    console.error("Bot Error:", error);
+    return NextResponse.json({ 
+        reply: "¡Ups! Mi cerebro de pizza tuvo un pequeño cortocircuito. ¿Podrías repetirme eso? 🍕🔌",
+        error: error.message 
+    }, { status: 500 });
   }
 }

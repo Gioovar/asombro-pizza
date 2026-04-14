@@ -103,6 +103,11 @@ export function AiChatbot() {
                 setIsOpen(false);
                 window.location.hash = "#events";
              }, 1000);
+         } else if (data.system_action.type === "OPEN_RESERVATION") {
+             setTimeout(() => {
+                setIsOpen(false);
+                window.dispatchEvent(new CustomEvent("open-reservation"));
+             }, 1000);
          }
       }
     } catch(e) {
