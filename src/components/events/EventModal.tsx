@@ -14,6 +14,9 @@ export function EventModal({ event, onClose }: { event: any, onClose: () => void
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const { user, token, isAuthenticated } = useAuth();
 
+  const handleAction = async (actionStr: "TICKET" | "TABLE") => {
+     setIsProcessing(true);
+     
      if (!isAuthenticated()) {
         setIsAuthOpen(true);
         setIsProcessing(false);
