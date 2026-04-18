@@ -23,6 +23,12 @@ export async function POST(req: Request) {
       }
     }
 
+    let customerName = "Invitado " + Math.floor(Math.random() * 1000);
+    if (finalUserId) {
+      const user = await prisma.user.findUnique({ where: { id: finalUserId } });
+      if (user) customerName = user.name;
+    }
+
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "No items in cart" }, { status: 400 });
     }
@@ -31,7 +37,7 @@ export async function POST(req: Request) {
     const order = await prisma.order.create({
       data: {
         userId: finalUserId,
-        customerName: finalUserId ? undefined : "Invitado " + Math.floor(Math.random() * 1000),
+        customerName: customerName,
         address: address || "Mostrador Web",
         tip: tip || 0.0,
         status: "NEW",
@@ -39,7 +45,7 @@ export async function POST(req: Request) {
         payment: paymentType || "CASH",
         items: {
           create: items.map((item: any) => ({
-            productId: item.id, // Assuming cart item ID is Prisma ID
+            productId: item.id, // Successfully sync'd with our seeded slugs
             quantity: item.quantity,
             price: item.price
           }))

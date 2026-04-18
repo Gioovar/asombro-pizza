@@ -56,68 +56,63 @@ async function main() {
     ]
   });
 
-  await prisma.product.createMany({
     data: [
-      // 1. PIZZAS — ESPECIALIDADES (Gourmet Descriptions)
+      // 1. PIZZAS — ESPECIALIDADES (Sync with menuData)
       { 
+        id: "brooklyn-double-meat",
         name: "Brooklyn Double Meat", 
         description: "Nuestra insignia. Pepperoni crujiente y salchicha italiana artesanal sobre una base de masa madre fermentada por 72 horas. El alma de Nueva York en cada bocado.", 
         image: "https://images.unsplash.com/photo-1513104890138-7c749659a591", 
         cost: 150, price: 340, categoryId: catPizzasEsp.id, config: pizzaSizesConfig 
       },
       { 
-        name: "Truffle & Mushroom", 
-        description: "Fusión de hongos silvestres, aceite de trufa blanca, mozzarella fresca y un toque de tomillo fresco. Sofisticación absoluta sobre masa artesanal.", 
-        image: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e", 
-        cost: 180, price: 420, categoryId: catPizzasEsp.id, config: pizzaSizesConfig 
+        id: "meat-lovers",
+        name: "Meat Lovers", 
+        description: "Una explosión de proteínas: pepperoni de corte grueso + chorizo italiano + jamón ahumado a la leña + tocino crujiente + mozzarella premium.", 
+        image: "https://images.unsplash.com/photo-1541745537411-b8046dc6d66c", 
+        cost: 140, price: 310, categoryId: catPizzasEsp.id, config: pizzaSizesConfig 
       },
       { 
-        name: "Proshutto & Fig", 
-        description: "Delicado Prosciutto di Parma, higos frescos (temporada), arúgula baby y reducción de balsámico de Módena. Un equilibrio magistral de dulce y salado.", 
-        image: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee", 
-        cost: 190, price: 450, categoryId: catPizzasEsp.id, config: pizzaSizesConfig 
+        id: "bbq-chicken",
+        name: "BBQ Chicken", 
+        description: "Pollo premium marinado + salsa BBQ artesanal con toque de bourbon + tocino ahumado + mozzarella + cebolla morada caramelizada.", 
+        image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38", 
+        cost: 130, price: 295, categoryId: catPizzasEsp.id, config: pizzaSizesConfig 
       },
       { 
-        name: "Mortazza Bianca", 
-        description: "Base blanca (sin tomate), mortadela de pistache, stracciatella italiana y lluvia de pistache tostado. La reina de la elegancia romana.", 
-        image: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e", 
-        cost: 185, price: 430, categoryId: catPizzasEsp.id, config: pizzaSizesConfig 
-      },
-
-      // 2. PIZZAS — CLÁSICAS
-      { 
-        name: "Pepperoni Artisan", 
-        description: "Pepperoni de corte grueso, mozzarella de alta humedad y nuestra legendaria salsa de tomate San Marzano.", 
-        image: "https://images.unsplash.com/photo-1628840042765-356cda07504e", 
-        cost: 110, price: 290, categoryId: catPizzasClas.id, config: pizzaSizesConfig 
-      },
-      { 
-        name: "Margherita Real", 
-        description: "La pureza de lo simple. Mozzarella fresca fior di latte, albahaca orgánica y aceite de oliva extra virgen prensado en frío.", 
+        id: "lasagna-pizza",
+        name: "Lasagna Pizza", 
+        description: "Carne molida seleccionada + base de mozzarella + nubes de ricotta fresca + salsa de tomate San Marzano + especias de la nonna.", 
         image: "https://images.unsplash.com/photo-1574129810554-7291008d440c", 
-        cost: 100, price: 260, categoryId: catPizzasClas.id, config: pizzaSizesConfig 
+        cost: 145, price: 315, categoryId: catPizzasEsp.id, config: pizzaSizesConfig 
       },
-
-      // 3. ALITAS & BONELESS
       { 
-        name: "Wings Brooklyn Smoke", 
+        id: "mortazza",
+        name: "Mortazza", 
+        description: "Masa madre infusionada + mortadela de Bolonia con pistache + stracciatella fresca + lluvia de pistache tostado + pesto de albahaca real.", 
+        image: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e", 
+        cost: 180, price: 380, categoryId: catPizzasEsp.id, config: pizzaSizesConfig 
+      },
+      { 
+        id: "alitas-new",
+        name: "Signature Wings", 
         description: "10 piezas de alitas premium marinadas en nuestra salsa BBQ ahumada con madera de cerezo.", 
         image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec", 
         cost: 120, price: 280, categoryId: catAlitas.id 
       },
       { 
-        name: "Hell Fire Boneless", 
+        id: "boneless-new",
+        name: "Boneless Premium", 
         description: "Trozo de pechuga artesanal bañada en salsa Buffalo de la casa, nivel de picante: Solo para Squad Members.", 
         image: "https://images.unsplash.com/photo-1569058242253-92a9c71f986d", 
         cost: 120, price: 280, categoryId: catAlitas.id 
       },
-
-      // 4. BEBIDAS
       { 
-        name: "Negroni Signature", 
-        description: "El cóctel italiano por excelencia. Ginebra, Vermut y Campari con un twist cítrico asombroso.", 
-        image: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2", 
-        cost: 60, price: 180, categoryId: catBebidas.id 
+        id: "refresco-clasico",
+        name: "Bebidas Curadas", 
+        description: "Selección de bebidas para acompañar tu experiencia gastronómica.", 
+        image: "https://images.unsplash.com/photo-1622483767028-3f66f361ef56", 
+        cost: 30, price: 65, categoryId: catBebidas.id 
       },
     ]
   });

@@ -101,11 +101,16 @@ export function CheckoutModal() {
       });
       const data = await res.json();
 
+      if (!res.ok) {
+        throw new Error(data.error || "Operación fallida.");
+      }
+
       clearCart();
       setOrderSuccess(true);
       if (data.orderId) setTrackingOrderId(data.orderId);
-    } catch(e) {
-      console.log(e);
+    } catch(e: any) {
+      console.error(e);
+      alert(e.message || "Error al procesar el pedido.");
     } finally {
       setIsCheckingOut(false);
     }
