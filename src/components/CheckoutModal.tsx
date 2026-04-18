@@ -7,6 +7,7 @@ import { useCartStore } from "../store/useCartStore";
 import { useUserStore } from "../store/useUserStore";
 import { useAuth } from "../store/useAuth";
 import { useAuthGuardStore } from "../store/useAuthGuardStore";
+import { OrderTrackingModal } from "./OrderTrackingModal";
 import Image from "next/image";
 
 export function CheckoutModal() {
@@ -24,6 +25,7 @@ export function CheckoutModal() {
   const [selectedTip, setSelectedTip] = useState<number>(0); // percentage
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [trackingOrderId, setTrackingOrderId] = useState<string | null>(null);
 
   // Sub-forms
   const [tempAddress, setTempAddress] = useState("");
@@ -87,7 +89,7 @@ export function CheckoutModal() {
     try {
       const tipAmount = Math.round(getTotalPrice() * (selectedTip / 100));
 
-      await fetch("/api/client/checkout", {
+      const res = await fetch("/api/client/checkout", {
          method: "POST",
          headers: {
             "Content-Type": "application/json",
@@ -102,9 +104,11 @@ export function CheckoutModal() {
             paymentType: tempPayment
          })
       });
+      const data = await res.json();
 
-      setOrderSuccess(true);
       clearCart();
+      setOrderSuccess(true);
+      if (data.orderId) setTrackingOrderId(data.orderId);
     } catch(e) {
       console.log(e);
     } finally {
@@ -113,6 +117,7 @@ export function CheckoutModal() {
   };
 
   return (
+    <>
     <AnimatePresence>
       {isCartOpen && (
         <>
@@ -158,13 +163,23 @@ export function CheckoutModal() {
 
             <div className="flex-1 overflow-y-auto bg-gray-50/50">
               {orderSuccess ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-8 anime-in fade-in zoom-in">
-                  <CheckCircle size={80} className="text-green-500 mb-6" />
-                  <h3 className="text-3xl font-black font-poppins mb-2">¡Pedido Pagado!</h3>
-                  <p className="text-gray-500 mb-8 leading-relaxed">Tu transacción procesó correctamente. ¡Mandamos la propina directo a tu repartidor!</p>
-                  <button 
-                    onClick={() => { setOrderSuccess(false); setStep(1); toggleCart(); }}
-                    className="w-full py-4 bg-black text-white rounded-xl font-black text-lg"
+                <div className="h-full flex flex-col items-center justify-center text-center p-8">
+                  <CheckCircle size={72} className="text-green-500 mb-5" />
+                  <h3 className="text-2xl font-black font-poppins mb-2">¡Pedido confirmado!</h3>
+                  <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+                    Tu orden está siendo procesada. Puedes seguirla en tiempo real.
+                  </p>
+                  {trackingOrderId && (
+                    <button
+                      onClick={() => { toggleCart(); }}
+                      className="w-full py-4 bg-[var(--color-brand-orange)] text-white rounded-2xl font-black text-base mb-3"
+                    >
+                      Ver seguimiento en vivo →
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setOrderSuccess(false); setStep(1); setTrackingOrderId(null); toggleCart(); }}
+                    className="w-full py-3 border border-gray-200 text-gray-600 rounded-2xl font-bold text-sm"
                   >
                     Volver al inicio
                   </button>
@@ -350,5 +365,20 @@ export function CheckoutModal() {
         </>
       )}
     </AnimatePresence>
+
+    {/* Order tracking — rendered outside the cart panel, over everything */}
+    <AnimatePresence>
+      {trackingOrderId && !isCartOpen && (
+        <OrderTrackingModal
+          orderId={trackingOrderId}
+          onClose={() => {
+            setTrackingOrderId(null);
+            setOrderSuccess(false);
+            setStep(1);
+          }}
+        />
+      )}
+    </AnimatePresence>
+    </>
   );
 }

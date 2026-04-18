@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useDriverStore } from "@/store/useDriverStore";
-import { Navigation2, Phone, MessageCircle, MapPin, CheckCircle2 } from "lucide-react";
+import { Navigation2, Phone, MessageCircle, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { Suspense } from "react";
@@ -15,6 +15,23 @@ function ActiveOrderContent() {
   const { driverId } = useDriverStore();
   
   const [orderState, setOrderState] = useState<"TO_RESTAURANT" | "TO_CUSTOMER">("TO_RESTAURANT");
+
+  // Broadcast real GPS to API so customer can track live
+  useEffect(() => {
+    if (!orderId) return;
+    const watchId = navigator.geolocation?.watchPosition(
+      (pos) => {
+        fetch("/api/driver/location", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId, lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        }).catch(() => {});
+      },
+      () => {},
+      { enableHighAccuracy: true, maximumAge: 5000 }
+    );
+    return () => { if (watchId !== undefined) navigator.geolocation?.clearWatch(watchId); };
+  }, [orderId]);
 
   const handleAction = async () => {
      if (orderState === "TO_RESTAURANT") {

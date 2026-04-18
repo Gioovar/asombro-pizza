@@ -59,7 +59,9 @@ model Order {
   
   driverId     String?
   driver       Driver?     @relation(fields: [driverId], references: [id])
-  
+  driverLat    Float?
+  driverLng    Float?
+
   items        OrderItem[]
 }
 
