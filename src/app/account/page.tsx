@@ -16,8 +16,8 @@ import { AddressAutocomplete } from "../../components/common/AddressAutocomplete
 type Tab = "profile" | "reservations" | "orders" | "tickets";
 
 const STATUS_LABEL: Record<string, string> = {
-  NEW: "Received", PREPARING: "In Prep", READY: "Ready",
-  ON_WAY: "On Way", DELIVERED: "Delivered", CANCELLED: "Cancelled",
+  NEW: "Recibido", PREPARING: "En Cocina", READY: "Control",
+  ON_WAY: "En Ruta", DELIVERED: "Entregado", CANCELLED: "Cancelado",
 };
 
 const STATUS_COLOR: Record<string, string> = {
@@ -99,7 +99,7 @@ export default function AccountPage() {
       if (res.ok) {
         setAuth(data.user, token!);
         setUserData((prev: any) => ({ ...prev, ...data.user }));
-        setProfileMsg("✓ VIP Credentials Updated");
+        setProfileMsg("✓ Credenciales Actualizadas");
       }
     } finally {
       setSavingProfile(false);
@@ -140,10 +140,10 @@ export default function AccountPage() {
   );
 
   const tabs: { id: Tab; label: string; icon: any }[] = [
-    { id: "profile",      label: "Intelligence",   icon: UserIcon },
-    { id: "reservations", label: "Squad Tables",   icon: Calendar },
-    { id: "orders",       label: "Mission Log", icon: ShoppingBag },
-    { id: "tickets",      label: "Access Passes", icon: Ticket },
+    { id: "profile",      label: "Inteligencia",   icon: UserIcon },
+    { id: "reservations", label: "Mesas Squad",   icon: Calendar },
+    { id: "orders",       label: "Bitácora", icon: ShoppingBag },
+    { id: "tickets",      label: "Pases VIP", icon: Ticket },
   ];
 
   return (
@@ -159,10 +159,10 @@ export default function AccountPage() {
            <div>
               <div className="flex items-center gap-2 mb-3">
                  <Zap size={14} className="text-[var(--color-brand-orange)] fill-[var(--color-brand-orange)]" />
-                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">Authenticated Member</span>
+                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">Socio Squad Activo</span>
               </div>
               <h1 className="text-5xl md:text-7xl font-black font-poppins italic tracking-tighter uppercase leading-none">
-                 Squad <span className="text-[var(--color-brand-orange)]">HQ</span>
+                 Base <span className="text-[var(--color-brand-orange)]">Squad</span>
               </h1>
            </div>
            
@@ -171,8 +171,8 @@ export default function AccountPage() {
                  <ShieldCheck size={28} />
               </div>
               <div>
-                 <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Membership Level</p>
-                 <p className="text-lg font-black italic tracking-tighter uppercase">Asombro VIP Member</p>
+                 <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Nivel de Membresía</p>
+                 <p className="text-lg font-black italic tracking-tighter uppercase">Socio VIP Asombro</p>
               </div>
            </div>
         </header>
@@ -209,7 +209,7 @@ export default function AccountPage() {
                 </div>
                 <div>
                    <h2 className="text-2xl font-black font-poppins italic tracking-tighter uppercase">{userData?.name}</h2>
-                   <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mt-1 opacity-60">Verified Member Since {new Date(userData?.createdAt || Date.now()).getFullYear()}</p>
+                   <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mt-1 opacity-60">Miembro Verificado desde {new Date(userData?.createdAt || Date.now()).getFullYear()}</p>
                 </div>
               </div>
 
@@ -237,7 +237,7 @@ export default function AccountPage() {
                     onClick={logout}
                     className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-red-500/60 hover:bg-red-500/10 hover:text-red-50 transition-all"
                   >
-                    <LogOut size={16} /> Self-Destruct Session
+                    <LogOut size={16} /> Finalizar Sesión Operativa
                   </button>
                 </div>
               </div>
@@ -260,17 +260,17 @@ export default function AccountPage() {
                 {activeTab === "profile" && (
                   <div className="space-y-10">
                     <div>
-                       <h3 className="text-3xl font-black font-poppins italic tracking-tighter uppercase mb-2">Member Intelligence</h3>
-                       <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Post-Purchase Encryption & Logistics</p>
+                       <h3 className="text-3xl font-black font-poppins italic tracking-tighter uppercase mb-2">Inteligencia del Miembro</h3>
+                       <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Seguridad y Logística de Cuenta</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                        {/* Identity Card */}
                        <div className="bg-white rounded-[3.5rem] p-10 shadow-2xl border border-gray-100 relative group">
-                          <label className="block text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 mb-8 ml-2">Personal Credentials</label>
+                          <label className="block text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 mb-8 ml-2">Credenciales Personales</label>
                           <div className="space-y-6">
                             <div className="space-y-2">
-                               <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest ml-1">Full Name</p>
+                               <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest ml-1">Nombre Completo</p>
                                <input
                                  value={editName}
                                  onChange={e => setEditName(e.target.value)}
@@ -278,7 +278,7 @@ export default function AccountPage() {
                                />
                             </div>
                             <div className="space-y-2">
-                               <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest ml-1">Secure Email</p>
+                               <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest ml-1">Email Encriptado</p>
                                <input
                                  value={userData?.email || ""}
                                  disabled
@@ -286,7 +286,7 @@ export default function AccountPage() {
                                />
                             </div>
                             <div className="space-y-2">
-                               <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest ml-1">Squad Comms (Tel)</p>
+                               <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest ml-1">Comunicaciones (Tel)</p>
                                <input
                                  value={editPhone}
                                  onChange={e => setEditPhone(e.target.value)}
@@ -298,7 +298,7 @@ export default function AccountPage() {
                               disabled={savingProfile}
                               className="w-full bg-black text-white py-5 rounded-[1.5rem] font-black italic uppercase tracking-widest text-[10px] hover:bg-[var(--color-brand-orange)] transition-all shadow-xl flex items-center justify-center gap-3 disabled:opacity-50 mt-4 group"
                             >
-                               {savingProfile ? "Syncing..." : "Sync Credentials"}
+                               {savingProfile ? "Sincronizando..." : "Actualizar Perfil"}
                                <Check size={16} className="group-hover:scale-110 transition-transform" />
                             </button>
                             {profileMsg && <p className="text-center text-[10px] font-black text-green-600 uppercase tracking-widest animate-fade-in">{profileMsg}</p>}
@@ -314,7 +314,7 @@ export default function AccountPage() {
                              <div className="relative z-10 flex flex-col h-full justify-between">
                                 <div>
                                    <div className="flex justify-between items-center mb-10">
-                                      <h4 className="font-black italic uppercase tracking-tighter text-xl">Operational Hubs</h4>
+                                      <h4 className="font-black italic uppercase tracking-tighter text-xl">Hubs de Operación</h4>
                                       <button onClick={() => setShowAddressForm(!showAddressForm)} className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-[var(--color-brand-orange)] transition-all border border-white/10">
                                          <Plus size={18} />
                                       </button>
@@ -322,7 +322,7 @@ export default function AccountPage() {
                                    
                                    <div className="space-y-4 max-h-[250px] overflow-y-auto custom-scrollbar pr-2">
                                       {userData?.addresses?.length === 0 ? (
-                                        <p className="text-white/30 text-[10px] font-black uppercase tracking-widest text-center py-10">No hubs registered</p>
+                                        <p className="text-white/30 text-[10px] font-black uppercase tracking-widest text-center py-10">Sin hubs registrados</p>
                                       ) : (
                                         userData?.addresses?.map((addr: any) => (
                                           <div key={addr.id} className={`p-5 rounded-2xl border transition-all ${addr.isDefault ? 'bg-white/10 border-[var(--color-brand-orange)]' : 'bg-white/5 border-white/5'}`}>
@@ -347,7 +347,7 @@ export default function AccountPage() {
                                       <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center shadow-lg shadow-green-500/20">
                                          <Activity size={16} className="text-white" />
                                       </div>
-                                      <p className="text-[9px] font-black uppercase text-white/40">Secure Delivery Active</p>
+                                      <p className="text-[9px] font-black uppercase text-white/40">Logística Activa</p>
                                    </div>
                                 </div>
                              </div>
@@ -361,12 +361,12 @@ export default function AccountPage() {
                 {activeTab === "reservations" && (
                   <div className="space-y-10">
                     <div>
-                       <h3 className="text-3xl font-black font-poppins italic tracking-tighter uppercase mb-2">Hospitality Access</h3>
-                       <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Real-World Dining Experiences & Masterclasses</p>
+                       <h3 className="text-3xl font-black font-poppins italic tracking-tighter uppercase mb-2">Acceso a Mesas</h3>
+                       <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Experiencias Gourmet y Masterclasses</p>
                     </div>
 
                     {!userData?.reservations?.length ? (
-                      <EmptyState label="Request a table for the ultimate experience." cta="Book Strategic Table" onClick={() => router.push("/")} />
+                      <EmptyState label="Solicita una mesa para vivir la experiencia táctica." cta="Reservar Mesa Estratégica" onClick={() => router.push("/")} />
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         {userData.reservations.map((res: any) => (
@@ -376,28 +376,28 @@ export default function AccountPage() {
                             </div>
                             <div className="relative z-10 flex-1">
                                <div className="flex items-center gap-3 mb-6">
-                                  <div className="bg-black text-white px-5 py-2 rounded-2xl text-[9px] font-black uppercase tracking-widest italic border border-white/10">SQUAD_VERIFIED</div>
+                                  <div className="bg-black text-white px-5 py-2 rounded-2xl text-[9px] font-black uppercase tracking-widest italic border border-white/10">SQUAD_VERIFICADO</div>
                                   <span className="text-gray-300 font-extrabold text-[10px]">AUTH_{res.id.slice(-6).toUpperCase()}</span>
                                </div>
-                               <h4 className="text-3xl font-black italic tracking-tighter uppercase mb-8">Executive Dining</h4>
+                               <h4 className="text-3xl font-black italic tracking-tighter uppercase mb-8">Cena de Élite</h4>
                                <div className="grid grid-cols-1 gap-4">
                                   <div className="flex justify-between items-end border-b border-gray-50 pb-4">
-                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Strategic Date</span>
-                                     <span className="font-black italic text-lg leading-none">{new Date(res.date).toLocaleDateString("en-US", { month: 'short', day: '2-digit', year: 'numeric' })}</span>
+                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Fecha de Misión</span>
+                                     <span className="font-black italic text-lg leading-none">{new Date(res.date).toLocaleDateString("es-ES", { month: 'short', day: '2-digit', year: 'numeric' })}</span>
                                   </div>
                                   <div className="flex justify-between items-end border-b border-gray-50 pb-4">
-                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Arrival Window</span>
-                                     <span className="font-black italic text-lg leading-none">{res.time} PST</span>
+                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Ventana de Arribo</span>
+                                     <span className="font-black italic text-lg leading-none">{res.time} HRS</span>
                                   </div>
                                   <div className="flex justify-between items-end">
-                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Asset Party Size</span>
+                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Tamaño del Grupo</span>
                                      <span className="font-black italic text-lg leading-none">{res.partySize} PAX</span>
                                   </div>
                                </div>
                             </div>
                             <div className="relative z-10 flex flex-col items-center border-t border-gray-50 pt-10">
                                <QRCode data={`RES|${res.id}|${res.date}`} size={160} />
-                               <p className="text-[9px] font-black uppercase tracking-widest text-gray-300 mt-6 text-center">Scan at Flagship Entrance for Biometric Validation</p>
+                               <p className="text-[9px] font-black uppercase tracking-widest text-gray-300 mt-6 text-center">Escanea en la entrada para validación táctica</p>
                             </div>
                           </div>
                         ))}
@@ -410,12 +410,12 @@ export default function AccountPage() {
                 {activeTab === "orders" && (
                   <div className="space-y-10">
                     <div>
-                       <h3 className="text-3xl font-black font-poppins italic tracking-tighter uppercase mb-2">Mission Log</h3>
-                       <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Post-Mission Delivery & Asset Tracking</p>
+                       <h3 className="text-3xl font-black font-poppins italic tracking-tighter uppercase mb-2">Bitácora de Misión</h3>
+                       <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Seguimiento de Logística y Despliegue Gastronómico</p>
                     </div>
 
                     {!userData?.orders?.length ? (
-                      <EmptyState label="No missions recorded. Start your gastronomical journey." cta="Initiate Mission" onClick={() => router.push("/#menu")} />
+                      <EmptyState label="Sin misiones registradas. Inicia tu viaje táctico." cta="Iniciar Misión" onClick={() => router.push("/#menu")} />
                     ) : (
                       <div className="space-y-10">
                         {userData.orders.map((order: any) => (
@@ -431,8 +431,8 @@ export default function AccountPage() {
                                 <p className="text-sm text-gray-400 font-bold uppercase tracking-widest">{new Date(order.createdAt).toLocaleString("en-US", { month: 'long', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</p>
                               </div>
                               <div className="text-right">
-                                 <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">Total Payload</p>
-                                 <h3 className="font-black italic text-4xl tracking-tighter text-black">${order.total} <span className="text-xs not-italic text-gray-400">USD</span></h3>
+                                 <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">Carga de Valor</p>
+                                 <h3 className="font-black italic text-4xl tracking-tighter text-black">${order.total} <span className="text-xs not-italic text-gray-400">MXN</span></h3>
                               </div>
                             </div>
                             
@@ -456,7 +456,7 @@ export default function AccountPage() {
                                  target="_blank"
                                  className="flex-1 min-w-[140px] flex items-center justify-center gap-3 bg-neutral-900 hover:bg-black text-white h-16 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all shadow-xl"
                                >
-                                 <MessageCircle size={18} /> Direct Tactical Comms
+                                 <MessageCircle size={18} /> Comunicación Táctica Directa
                                </a>
                                <a
                                  href="tel:+525500000000"
@@ -476,12 +476,12 @@ export default function AccountPage() {
                 {activeTab === "tickets" && (
                   <div className="space-y-10">
                     <div>
-                       <h3 className="text-3xl font-black font-poppins italic tracking-tighter uppercase mb-2">Access Passes</h3>
-                       <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Vinyl Nights, Masterclasses & Underground Access</p>
+                       <h3 className="text-3xl font-black font-poppins italic tracking-tighter uppercase mb-2">Pases VIP</h3>
+                       <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Noches de Vinilo, Masterclasses y Eventos Exclusivos</p>
                     </div>
 
                     {!userData?.tickets?.length ? (
-                      <EmptyState label="No upcoming events secured." cta="Secure Spot" onClick={() => router.push("/#events")} />
+                      <EmptyState label="Sin pases reservados actualmente." cta="Asegurar Lugar" onClick={() => router.push("/#events")} />
                     ) : (
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                         {userData.tickets.map((ticket: any) => (
@@ -493,20 +493,20 @@ export default function AccountPage() {
                             
                             <div className="relative z-10 w-full text-center border-b border-white/10 pb-10 mb-10">
                                <div className="inline-flex items-center gap-2 bg-[var(--color-brand-orange)] text-white px-5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest mb-8 animate-pulse">
-                                  <Sparkles size={12} /> {ticket.type} ACCESS PASS
+                                  <Sparkles size={12} /> PASE DE ACCESO {ticket.type}
                                </div>
                                <h4 className="text-4xl font-black italic tracking-tighter uppercase mb-3 text-white leading-none whitespace-normal break-words">{ticket.event.title}</h4>
-                               <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">{new Date(ticket.event.date).toLocaleString("en-US", { month: 'long', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</p>
+                               <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">{new Date(ticket.event.date).toLocaleString("es-ES", { month: 'long', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</p>
                             </div>
                             
                             <div className="relative z-10 flex flex-col items-center w-full">
                                <div className="bg-white p-6 rounded-[3rem] shadow-2xl transform group-hover:scale-110 transition-transform">
                                   <QRCode data={`TICKET|${ticket.id}|${ticket.eventId}`} size={140} />
                                 </div>
-                                <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mt-10">Scan for VIP Squad Validation</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mt-10">Escanea para validación de Miembro Squad</p>
                                 <div className="mt-8 flex items-center gap-2 text-[var(--color-brand-orange)]">
                                    <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-orange)] shadow-[0_0_10px_rgba(255,90,0,1)] animate-pulse" />
-                                   <span className="text-[9px] font-black uppercase tracking-widest">Authentic NFT-Grade Pass</span>
+                                   <span className="text-[9px] font-black uppercase tracking-widest">Pase de Grado Táctico Certificado</span>
                                 </div>
                             </div>
                           </div>

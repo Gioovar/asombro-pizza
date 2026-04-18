@@ -68,7 +68,7 @@ export default function OrdersPage() {
         <div>
            <div className="flex items-center gap-2 mb-3">
               <Zap size={14} className="text-[var(--color-brand-orange)] fill-[var(--color-brand-orange)]" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Mission Control</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Panel de Control</span>
            </div>
            <h1 className="text-5xl font-black font-poppins tracking-tighter italic uppercase leading-none">
              Logística <span className="text-[var(--color-brand-orange)]">Operativa</span>
@@ -82,7 +82,7 @@ export default function OrdersPage() {
               </div>
               <div>
                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 leading-tight">Estado Síncrono</p>
-                 <p className="text-sm font-black italic tracking-tighter">Live Monitor Active</p>
+                 <p className="text-sm font-black italic tracking-tighter">Sincronización en Vivo</p>
               </div>
            </div>
         </div>
@@ -127,7 +127,7 @@ export default function OrdersPage() {
                       >
                          <div className="flex justify-between items-start mb-6">
                             <div className="bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100">
-                               <p className="text-[8px] font-black text-gray-300 uppercase tracking-[0.2em] leading-none mb-1">Squad Ticket</p>
+                               <p className="text-[8px] font-black text-gray-300 uppercase tracking-[0.2em] leading-none mb-1">Ticket Squad</p>
                                <span className="text-[10px] font-black text-gray-500 italic uppercase">#{order.id.slice(-6).toUpperCase()}</span>
                             </div>
                             <div className="flex items-center gap-2 bg-neutral-900 px-3 py-1.5 rounded-xl text-white shadow-xl translate-y-[-10px]">
@@ -165,7 +165,7 @@ export default function OrdersPage() {
 
                          <div className="flex justify-between items-center pt-6 border-t border-gray-50">
                             <div>
-                               <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 leading-none">Subtotal Valor</p>
+                               <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1 leading-none">Valor de Misión</p>
                                <span className="font-black text-2xl italic tracking-tighter text-black">${order.total}</span>
                             </div>
                             

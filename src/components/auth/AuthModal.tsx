@@ -109,7 +109,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, intentMessage }: AuthMod
                  </div>
               </motion.div>
               <h2 className="text-4xl font-black font-poppins tracking-tighter italic uppercase leading-none text-center">
-                {mode === "login" ? "Welcome" : "The Squad"}
+                {mode === "login" ? "Bienvenido" : "El Squad"}
               </h2>
               <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.3em] mt-3 opacity-60">
                 {mode === "register" ? "Únete a la elite de la masa madre" : "Accede a tu cuenta de curaduría"}
@@ -255,9 +255,9 @@ export function AuthModal({ isOpen, onClose, onSuccess, intentMessage }: AuthMod
             </form>
 
             <div className="mt-8 flex justify-center gap-6 text-[9px] text-gray-400 font-black uppercase tracking-[0.2em] opacity-40">
-              <span>🔒 Encrypt</span>
-              <span>🚀 Zero Spam</span>
-              <span>🎁 Squad Perks</span>
+              <span>🔒 Cifrado</span>
+              <span>🚀 Cero Spam</span>
+              <span>🎁 Beneficios Squad</span>
             </div>
           </div>
         </motion.div>

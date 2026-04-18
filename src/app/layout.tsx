@@ -15,7 +15,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Asombro Pizza | Premium Delivery & Experience",
+  title: "Asombro Pizza | Experiencia Gourmet & Delivery Premium",
   description: "Disfruta el sabor auténtico de Asombro Pizza. Pizzas premium, burgers artesanales, alitas, cervezas y más. ¡Pide online para delivery o reserva tu lugar!",
   keywords: ["pizza", "delivery", "burgers", "alitas", "asombro pizza", "comida a domicilio"],
   openGraph: {
@@ -53,7 +53,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="es"
       className={`${inter.variable} ${poppins.variable} font-sans h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground bg-[var(--color-bg)]">

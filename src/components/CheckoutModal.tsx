@@ -146,10 +146,10 @@ export function CheckoutModal() {
                  <div>
                     <h2 className="text-2xl font-black font-poppins italic tracking-tighter flex items-center gap-3 uppercase">
                       {step === 1 && "Canasta"}
-                      {step === 2 && "Drop Zone"}
-                      {step === 3 && "Fintech"}
+                      {step === 2 && "Zona de Drop"}
+                      {step === 3 && "Pago Táctico"}
                     </h2>
-                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Phase {step} of 3 • Tactical Deployment</p>
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400">Fase {step} de 3 • Despliegue Táctico</p>
                  </div>
               </div>
               <button onClick={toggleCart} className="p-3 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all active:scale-95">
@@ -270,7 +270,7 @@ export function CheckoutModal() {
 
                         {/* Coordenadas */}
                         <div className="space-y-4">
-                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 block flex items-center gap-2"><MapPin size={16}/> Drop Zone Resolution</label>
+                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 block flex items-center gap-2"><MapPin size={16}/> Resolución de Zona (Drop Zone)</label>
                            <div className="relative group">
                               <AddressAutocomplete
                                 value={tempAddress}
@@ -383,7 +383,7 @@ export function CheckoutModal() {
                   )}
                   <div className="flex justify-between items-end w-full pt-4 border-t border-gray-50">
                      <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Mission Payload</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Carga Táctica Total</span>
                         <span className="font-black text-5xl font-poppins text-black italic tracking-tighter">
                           ${getTotalPrice() + (step === 3 ? Math.round(getTotalPrice() * (selectedTip / 100)) : 0)}
                        </span>
@@ -403,7 +403,7 @@ export function CheckoutModal() {
                     </span>
                   ) : (
                     <span className="flex items-center gap-2 relative z-10">
-                       {step === 3 ? 'Authorize Intelligence Mission' : 'Initiate Fintech Phase'} 
+                       {step === 3 ? 'Autorizar Misión Gastronómica' : 'Iniciar Fase Operativa'} 
                        <ArrowRight size={22} className="group-hover:translate-x-2 transition-transform duration-300" />
                     </span>
                   )}

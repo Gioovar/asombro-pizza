@@ -108,7 +108,7 @@ export function ReservationModal({ isOpen, onClose }: ReservationModalProps) {
              <div className="w-14 h-14 bg-[var(--color-brand-orange)]/10 text-[var(--color-brand-orange)] rounded-2xl flex items-center justify-center mb-6 border border-[var(--color-brand-orange)]/20 shadow-lg">
                 <CalendarIcon size={28} />
              </div>
-             <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none mb-2">Hospitality</h2>
+             <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none mb-2">Hospitalidad Squad</h2>
              <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em]">Reserva tu mesa • Asombro Experience</p>
           </div>
 
