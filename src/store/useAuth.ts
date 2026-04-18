@@ -8,6 +8,7 @@ interface User {
   phone?: string;
   avatar?: string;
   addresses?: any[];
+  payments?: any[];
 }
 
 interface AuthState {
