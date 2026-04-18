@@ -8,7 +8,7 @@ import {
   Calendar, Ticket, ShoppingBag, LogOut, Camera, MapPin, Plus,
   Trash2, Star, Check, X, Pencil, Lock, Phone, User as UserIcon,
   ChevronLeft, MessageCircle, Zap, ShieldCheck, CreditCard, Sparkles,
-  ArrowRight
+  ArrowRight, Activity
 } from "lucide-react";
 import { QRCode } from "../../components/common/QRCode";
 import { AddressAutocomplete } from "../../components/common/AddressAutocomplete";
