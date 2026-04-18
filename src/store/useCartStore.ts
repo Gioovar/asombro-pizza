@@ -50,11 +50,11 @@ export const useCartStore = create<CartStore>((set, get) => ({
   }),
   
   updateQuantity: (id, quantity) => set((state) => ({
-    items: state.items.map(i => i.id === id ? { ...i, quantity } : i)
+    items: state.items.map(i => i.cartItemId === id ? { ...i, quantity } : i)
   })),
   
   removeItem: (id) => set((state) => ({
-    items: state.items.filter(i => i.id !== id)
+    items: state.items.filter(i => i.cartItemId !== id)
   })),
   
   applyPromo: (promo) => set({ appliedPromo: promo }),

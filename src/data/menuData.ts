@@ -3,16 +3,15 @@ export interface MenuItem {
   name: string;
   shortDescription?: string;
   description: string;
-  price: number; // base price (smallest / default size)
+  price: number; 
   image: string;
   category: string;
-  config?: string; // JSON: ProductConfig
+  config?: string; 
 }
 
-// ── Types for parsed config ──────────────────────────────────────
 export interface OptionValue {
   label: string;
-  price: number; // price delta from base (can be 0, positive, or negative)
+  price: number; 
 }
 
 export interface OptionGroup {
@@ -26,29 +25,28 @@ export interface ProductConfig {
   options: OptionGroup[];
 }
 
-// ── Helpers ──────────────────────────────────────────────────────
 const pizzaConfig = (): string =>
   JSON.stringify({
     options: [
       {
-        name: "Tamaño",
+        name: "Dimensión",
         required: true,
         type: "selection",
         values: [
-          { label: "S",  price: 0  },
-          { label: "M",  price: 50 },
-          { label: "L",  price: 100 },
-          { label: "XL", price: 150 },
+          { label: "Personal (10\")",  price: 0  },
+          { label: "Medium (12\")",  price: 60 },
+          { label: "Grande (14\")",  price: 120 },
+          { label: "Squad XL (16\")", price: 180 },
         ],
       },
       {
-        name: "Extras",
+        name: "Curaduría Adicional",
         required: false,
         type: "multiple",
         values: [
-          { label: "Extra Queso",       price: 35 },
-          { label: "Orilla de Queso",   price: 40 },
-          { label: "Doble Ingrediente", price: 50 },
+          { label: "Extra Mozzarella de Búfala", price: 45 },
+          { label: "Orilla de Queso Provolone", price: 50 },
+          { label: "Doble Ingrediente Artesanal", price: 65 },
         ],
       },
     ],
@@ -58,38 +56,36 @@ const alitasConfig = (): string =>
   JSON.stringify({
     options: [
       {
-        name: "Tipo",
+        name: "Presentación",
         required: true,
         type: "selection",
         values: [
-          { label: "Alitas",   price: 0  },
-          { label: "Boneless", price: 20 },
+          { label: "Alitas Classic",   price: 0  },
+          { label: "Boneless Premium", price: 30 },
         ],
       },
       {
-        name: "Sabor",
+        name: "Signature Glaze",
         required: true,
         type: "selection",
         values: [
-          { label: "BBQ (Brooklyn Smoke)",   price: 0 },
-          { label: "Buffalo (Hell Fire 718)", price: 0 },
-          { label: "Mango Habanero",          price: 0 },
-          { label: "Tamarindo",               price: 0 },
-          { label: "Parmesano",               price: 15 },
+          { label: "Brooklyn Smoke (BBQ)", price: 0 },
+          { label: "Hell Fire 718 (Buffalo)", price: 0 },
+          { label: "Mango Habanero Fusion", price: 0 },
+          { label: "Tamarindo Glaze", price: 0 },
+          { label: "Parmesano & Trufa", price: 45 },
         ],
       },
     ],
   } as ProductConfig);
 
-// ── Menu Data ────────────────────────────────────────────────────
 export const menuData: MenuItem[] = [
-  // PIZZAS — ESPECIALIDADES
   {
     id: "brooklyn-double-meat",
     name: "Brooklyn Double Meat",
-    shortDescription: "La favorita de Brooklyn",
-    description: "Pepperoni crujiente + salchicha italiana + mozzarella + salsa de tomate",
-    price: 280,
+    shortDescription: "La insignia del Squad",
+    description: "Masa madre 72h + pepperoni artesanal curado + salchicha italiana receta secreta + mozzarella de búfala + salsa 'Old School' de tomate San Marzano.",
+    price: 320,
     image: "https://images.unsplash.com/photo-1513104890138-7c749659a591",
     category: "Pizzas — Especialidades",
     config: pizzaConfig(),
@@ -97,9 +93,9 @@ export const menuData: MenuItem[] = [
   {
     id: "meat-lovers",
     name: "Meat Lovers",
-    shortDescription: "Para los amantes de la carne",
-    description: "Pepperoni + chorizo italiano + jamón ahumado + tocino + mozzarella",
-    price: 260,
+    shortDescription: "Curaduría Carnívora",
+    description: "Una explosión de proteínas: pepperoni de corte grueso + chorizo italiano + jamón ahumado a la leña + tocino crujiente + mozzarella premium.",
+    price: 310,
     image: "https://images.unsplash.com/photo-1541745537411-b8046dc6d66c",
     category: "Pizzas — Especialidades",
     config: pizzaConfig(),
@@ -107,9 +103,9 @@ export const menuData: MenuItem[] = [
   {
     id: "bbq-chicken",
     name: "BBQ Chicken",
-    shortDescription: "Pollo + BBQ irresistible",
-    description: "Pollo + salsa BBQ + tocino + mozzarella + cebolla",
-    price: 290,
+    shortDescription: "Ahuma y Seduce",
+    description: "Pollo premium marinado + salsa BBQ artesanal con toque de bourbon + tocino ahumado + mozzarella + cebolla morada caramelizada.",
+    price: 295,
     image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38",
     category: "Pizzas — Especialidades",
     config: pizzaConfig(),
@@ -117,9 +113,9 @@ export const menuData: MenuItem[] = [
   {
     id: "lasagna-pizza",
     name: "Lasagna Pizza",
-    shortDescription: "Lo mejor de dos mundos",
-    description: "Carne molida + mozzarella + ricotta + salsa de tomate",
-    price: 290,
+    shortDescription: "Herencia Italiana",
+    description: "Carne molida seleccionada + base de mozzarella + nubes de ricotta fresca + salsa de tomate San Marzano + especias de la nonna.",
+    price: 315,
     image: "https://images.unsplash.com/photo-1574129810554-7291008d440c",
     category: "Pizzas — Especialidades",
     config: pizzaConfig(),
@@ -127,40 +123,38 @@ export const menuData: MenuItem[] = [
   {
     id: "mortazza",
     name: "Mortazza",
-    shortDescription: "Pistache + stracciatella",
-    description: "Mortadela de pistache + stracciatella + pistache + pesto",
-    price: 320,
+    shortDescription: "La Joya Gourmet",
+    description: "Masa madre infusionada + mortadela de Bolonia con pistache + stracciatella fresca + lluvia de pistache tostado + pesto de albahaca real.",
+    price: 380,
     image: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e",
     category: "Pizzas — Especialidades",
     config: pizzaConfig(),
   },
 
-  // ALITAS & BONELESS
   {
     id: "alitas-new",
-    name: "Alitas",
-    description: "Alitas con hueso crujientes — elige tu sabor",
-    price: 190,
+    name: "Signature Wings",
+    description: "Alitas de pollo seleccionadas, cocción lenta y terminado al fuego para un crunch perfecto. Elige tu Signature Glaze.",
+    price: 220,
     image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec",
     category: "Alitas & Boneless",
     config: alitasConfig(),
   },
   {
     id: "boneless-new",
-    name: "Boneless",
-    description: "Pechuga de pollo sin hueso — elige tu sabor",
-    price: 210,
+    name: "Boneless Premium",
+    description: "Pechuga de pollo seleccionada a mano, empanizado artesanal y bañada en tu técnica de sabor preferida.",
+    price: 240,
     image: "https://images.unsplash.com/photo-1569058242253-92a9c71f986d",
     category: "Alitas & Boneless",
     config: alitasConfig(),
   },
 
-  // BEBIDAS
   {
     id: "refresco-clasico",
-    name: "Refresco 355ml",
-    description: "Selecciona tu sabor favorito",
-    price: 60,
+    name: "Bebidas Curadas",
+    description: "Selección de bebidas para acompañar tu experiencia gastronómica.",
+    price: 65,
     image: "https://images.unsplash.com/photo-1622483767028-3f66f361ef56",
     category: "Bebidas",
     config: JSON.stringify({
@@ -170,18 +164,11 @@ export const menuData: MenuItem[] = [
           required: true,
           type: "selection",
           values: [
-            { label: "Coca Cola",        price: 0 },
-            { label: "Coca Zero",        price: 0 },
-            { label: "Coca Light",       price: 0 },
-            { label: "Fanta",            price: 0 },
-            { label: "Sprite",           price: 0 },
-            { label: "Fresca",           price: 0 },
-            { label: "Sidral Mundet",    price: 0 },
-            { label: "Delaware Punch",   price: 0 },
-            { label: "Jugo Valle Mango", price: 0 },
-            { label: "Jugo Valle Guayaba", price: 0 },
-            { label: "Agua Ciel",        price: 0 },
-            { label: "Agua Mineral",     price: 0 },
+            { label: "Coca Cola original", price: 0 },
+            { label: "Coca Zero Pure", price: 0 },
+            { label: "Coca Light Sensation", price: 0 },
+            { label: "Agua Mineral de Manantial", price: 0 },
+            { label: "Sidral Mundet Heritage", price: 0 },
           ],
         },
       ],

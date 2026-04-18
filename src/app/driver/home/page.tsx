@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDriverStore } from "@/store/useDriverStore";
-import { Power, Navigation, BellRing, MapPin } from "lucide-react";
+import { Power, Navigation, BellRing, MapPin, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function DriverHome() {
@@ -42,7 +42,7 @@ export default function DriverHome() {
         const timer = setInterval(() => {
            setTimeLeft(prev => {
              if (prev <= 1) {
-                setLocalIncoming(null); // Timeout! Missed order.
+                setLocalIncoming(null); // Timeout!
                 return 0;
              }
              return prev - 1;
@@ -75,50 +75,88 @@ export default function DriverHome() {
   };
 
   return (
-    <div className="h-full relative overflow-hidden bg-gray-50 flex flex-col">
-       {/* Fake Map Background */}
-       <div className="absolute inset-0 pointer-events-none opacity-40 bg-[url('https://maps.wikimedia.org/osm-intl/14/3482/6659.png')] bg-cover bg-center filter grayscale contrast-125 mix-blend-multiply transition-all duration-1000" style={{ opacity: isOnline ? 0.8 : 0.2 }}></div>
+    <div className="h-full relative overflow-hidden bg-white flex flex-col">
+       {/* Fake Map Background - more contrast and premium feeling */}
+       <div 
+         className="absolute inset-0 pointer-events-none transition-all duration-1000 grayscale filter brightness-[0.8] contrast-150" 
+         style={{ 
+            backgroundImage: "url('https://maps.wikimedia.org/osm-intl/14/3482/6659.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            opacity: isOnline ? 0.6 : 0.15,
+            transform: isOnline ? "scale(1.05)" : "scale(1)"
+         }}
+       ></div>
 
-       {/* Map Overlay darkner when online */}
-       {isOnline && <div className="absolute inset-0 bg-blue-900/10 pointer-events-none"></div>}
-
-       <div className="relative z-10 px-6 pt-12 pb-6 flex justify-between items-center shadow-sm bg-white/80 backdrop-blur-md border-b border-gray-200">
-          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-500 shadow-inner">
-             {driverId ? "DR" : "X"}
+       {/* Top Header Glassmorphism */}
+       <div className="relative z-10 px-8 pt-14 pb-6 flex justify-between items-center bg-white/40 backdrop-blur-xl border-b border-white/20">
+          <div className="flex items-center gap-3">
+             <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center font-black shadow-xl">
+                {driverId?.charAt(0) || "D"}
+             </div>
+             <div className="leading-tight">
+                <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest leading-none mb-1">Repartidor</p>
+                <p className="font-bold text-gray-900">{driverId || "Giovanni"}</p>
+             </div>
           </div>
-          <div className="bg-white px-4 py-2 rounded-full font-bold shadow-md text-sm whitespace-nowrap flex items-center gap-2">
-             Hoy: <span className="text-green-600">$450.00</span>
+          <div className="bg-black/90 text-white px-5 py-2.5 rounded-2xl font-black shadow-2xl text-xs flex items-center gap-2 border border-white/10">
+             Hoy <span className="text-[var(--color-brand-orange)]">$450.00</span>
           </div>
        </div>
 
-       <div className="flex-1 flex flex-col justify-end p-8 relative z-10">
-          {!isOnline && (
-            <div className="text-center mb-8 bg-white/90 p-4 rounded-2xl shadow-lg backdrop-blur-md border border-gray-200">
-               <h2 className="font-bold text-gray-800">Estás Desconectado</h2>
-               <p className="text-sm text-gray-500 mt-1">Toca GO para buscar viajes.</p>
-            </div>
-          )}
+       <div className="flex-1 flex flex-col justify-end p-10 relative z-10">
+          <AnimatePresence>
+            {!isOnline && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center mb-10 bg-white/90 p-6 rounded-[2.5rem] shadow-2xl backdrop-blur-md border border-gray-100 flex flex-col items-center gap-2"
+              >
+                 <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 mb-2">
+                    <Power size={24} />
+                 </div>
+                 <h2 className="font-black text-xl text-gray-900">Estás Desconectado</h2>
+                 <p className="text-sm text-gray-500 font-medium">Pulsa GO para empezar a recibir pedidos.</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {isOnline && !localIncoming && (
-            <div className="text-center mb-8 bg-blue-600/90 text-white p-4 rounded-2xl shadow-lg backdrop-blur-md animate-pulse">
-               <h2 className="font-bold">Buscando viajes...</h2>
-               <p className="text-sm text-blue-200 mt-1">Estás en zona de alta demanda.</p>
-            </div>
+            <motion.div 
+               initial={{ opacity: 0, scale: 0.9 }}
+               animate={{ opacity: 1, scale: 1 }}
+               className="text-center mb-10 bg-black/95 text-white p-7 rounded-[2.5rem] shadow-2xl backdrop-blur-md relative overflow-hidden group"
+            >
+               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+               <div className="relative z-10">
+                  <div className="flex justify-center mb-4">
+                     <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                     </span>
+                  </div>
+                  <h2 className="font-black text-lg font-poppins mb-1 uppercase tracking-tighter">Buscando Pedidos...</h2>
+                  <p className="text-xs text-indigo-300 font-bold uppercase tracking-widest">Zona de alta demanda 🔥</p>
+               </div>
+            </motion.div>
           )}
 
           <div className="flex justify-center mt-auto mb-10">
              <button 
                onClick={toggleOnline}
-               className={`w-28 h-28 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 relative ${isOnline ? 'bg-red-500 shadow-red-500/40 hover:bg-red-600 hover:scale-95' : 'bg-blue-600 shadow-blue-500/40 hover:bg-blue-700 hover:scale-105'}`}
+               className={`w-32 h-32 rounded-full flex items-center justify-center shadow-[0_20px_60px_rgba(0,0,0,0.1)] transition-all duration-500 relative group active:scale-90 ${isOnline ? 'bg-white text-red-600' : 'bg-black text-white'}`}
              >
-                {/* Ripple Effect Ring */}
+                {/* Ripple Effect Ring when Online */}
                 {isOnline && (
-                   <span className="absolute inset-0 rounded-full border-4 border-blue-500 animate-ping opacity-20"></span>
+                   <span className="absolute inset-0 rounded-full border border-red-500/30 animate-[ping_2s_linear_infinite]"></span>
                 )}
                 
-                <span className="font-black text-white text-2xl tracking-widest font-poppins">
-                  {isOnline ? "STOP" : "GO"}
-                </span>
+                <div className="flex flex-col items-center">
+                   <span className="font-black text-3xl tracking-tighter italic font-poppins">
+                     {isOnline ? "OFF" : "GO"}
+                   </span>
+                   <Zap size={14} className={`mt-1 ${isOnline ? 'text-red-600' : 'text-[var(--color-brand-orange)] opacity-80'}`} fill="currentColor" />
+                </div>
              </button>
           </div>
        </div>
@@ -127,68 +165,82 @@ export default function DriverHome() {
        <AnimatePresence>
          {localIncoming && (
            <motion.div 
-             initial={{ y: "100%" }}
-             animate={{ y: 0 }}
-             exit={{ y: "100%" }}
-             transition={{ type: "spring", damping: 20, stiffness: 100 }}
-             className="absolute inset-x-0 bottom-0 top-0 z-50 bg-black/60 backdrop-blur-sm flex flex-col justify-end pb-32 pt-20 px-4"
+             initial={{ opacity: 0 }}
+             animate={{ opacity: 1 }}
+             exit={{ opacity: 0 }}
+             className="absolute inset-0 z-[100] bg-black/80 backdrop-blur-xl flex flex-col justify-end pb-12 px-6"
            >
-              <div className="bg-white rounded-[32px] p-6 shadow-2xl overflow-hidden relative">
-                 {/* Sonar animation ring */}
-                 <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500 rounded-full opacity-10 blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+              <motion.div 
+                initial={{ y: 100, scale: 0.9 }}
+                animate={{ y: 0, scale: 1 }}
+                exit={{ y: 100, opacity: 0 }}
+                className="bg-white rounded-[3rem] p-8 shadow-2xl relative overflow-hidden"
+              >
+                 {/* Visual urgency background effect */}
+                 <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                  
-                 <div className="flex justify-between items-start mb-6">
-                    <div className="flex items-center gap-3">
-                       <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
-                          <BellRing size={24} />
+                 <div className="flex justify-between items-start mb-10 relative z-10">
+                    <div className="flex items-center gap-4">
+                       <div className="w-16 h-16 bg-black text-white rounded-3xl flex items-center justify-center shadow-2xl">
+                          <Zap size={32} className="text-[var(--color-brand-orange)]" fill="currentColor" />
                        </div>
                        <div>
-                          <h3 className="font-black text-xl leading-none">Asombro Pizza</h3>
-                          <p className="text-sm text-gray-500 mt-1 flex items-center gap-1"><Navigation size={12} /> 2.4 km de ti</p>
+                          <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest leading-none mb-1">Nuevo Pedido Express</p>
+                          <h3 className="font-black text-2xl font-poppins tracking-tighter">Asombro Pizza</h3>
+                          <div className="flex items-center gap-2 mt-1">
+                             <div className="flex items-center gap-1 bg-green-50 text-green-700 px-2.5 py-1 rounded-full text-[10px] font-black uppercase">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                + $35.00 MXN
+                             </div>
+                             <p className="text-xs text-gray-500 font-bold tracking-tight">2.4 km de ti</p>
+                          </div>
                        </div>
                     </div>
                     
-                    <div className="w-12 h-12 relative flex items-center justify-center">
-                       {/* SVG Circular Countdown */}
+                    <div className="w-14 h-14 relative flex items-center justify-center">
                        <svg className="w-full h-full transform -rotate-90">
-                          <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-gray-200" />
+                          <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="5" fill="transparent" className="text-gray-100" />
                           <circle 
-                             cx="24" cy="24" r="20" 
+                             cx="28" cy="28" r="24" 
                              stroke="currentColor" 
-                             strokeWidth="4" 
+                             strokeWidth="5" 
                              fill="transparent" 
-                             strokeDasharray="125" 
-                             strokeDashoffset={125 - (125 * (timeLeft / 10))}
-                             className="text-blue-600 transition-all duration-1000 ease-linear" 
+                             strokeDasharray="150" 
+                             strokeDashoffset={150 - (150 * (timeLeft / 10))}
+                             className="text-black transition-all duration-1000 ease-linear" 
+                             strokeLinecap="round"
                           />
                        </svg>
-                       <span className="absolute font-bold text-sm text-blue-600">{timeLeft}</span>
+                       <span className="absolute font-black text-xl text-black font-poppins italic">{timeLeft}</span>
                     </div>
                  </div>
 
-                 <div className="bg-gray-50 rounded-2xl p-4 mb-6">
-                    <p className="text-sm text-gray-500 font-medium mb-1">Destino sugerido</p>
-                    <p className="font-bold flex items-start gap-2">
-                      <MapPin size={18} className="text-red-500 mt-0.5 shrink-0" />
-                      {localIncoming.address}
-                    </p>
+                 <div className="space-y-4 mb-10 relative z-10">
+                    <div className="bg-gray-50 rounded-[2rem] p-5 border border-gray-100">
+                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                          <MapPin size={12} /> Destino de entrega
+                       </p>
+                       <p className="font-bold text-[15px] leading-snug">
+                         {localIncoming.address}
+                       </p>
+                    </div>
                  </div>
 
-                 <div className="flex gap-4">
+                 <div className="flex gap-4 relative z-10">
                     <button 
                       onClick={handleReject}
-                      className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 shrink-0 font-bold"
+                      className="w-20 h-20 rounded-[2rem] bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 transition-colors"
                     >
-                       X
+                       <span className="font-black text-lg">X</span>
                     </button>
                     <button 
                       onClick={handleAccept}
-                      className="flex-1 bg-blue-600 text-white rounded-[24px] font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/30"
+                      className="flex-1 bg-black text-white rounded-[2rem] font-black text-xl italic hover:bg-neutral-900 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.2)] active:scale-95"
                     >
-                       Aceptar Viaje
+                       ACEPTAR
                     </button>
                  </div>
-              </div>
+              </motion.div>
            </motion.div>
          )}
        </AnimatePresence>

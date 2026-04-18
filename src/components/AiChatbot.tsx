@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, X, Send, Mic, Sparkles, Bot, User, CheckCircle2 } from "lucide-react";
+import { MessageSquare, X, Send, Mic, Sparkles, Bot, User, CheckCircle2, Zap } from "lucide-react";
 import { useCartStore } from "../store/useCartStore";
 import { useAuth } from "../store/useAuth";
 import { useAuthGuardStore } from "../store/useAuthGuardStore";
@@ -17,7 +17,7 @@ interface ChatMessage {
 export function AiChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([{
-    id: "init", sender: "bot", text: "¡Hola! Soy AsombroBot 🍕🤖. ¿Tienes hambre? Puedo mostrarte el menú, ofertas o tomar tu pedido por vos."
+    id: "init", sender: "bot", text: "¡Hey! Soy AsombroBot 🍕. Tu conserje personal de pizzas de masa madre. ¿Hambre de algo espectacular?"
   }]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -47,7 +47,6 @@ export function AiChatbot() {
          const transcript = event.results[0][0].transcript;
          setInput(transcript);
          setIsListening(false);
-         // Auto-send if desired, for now just populate input
          handleSend(transcript);
       };
       
@@ -86,7 +85,7 @@ export function AiChatbot() {
       const replyBody = data.reply || data.error || "Lo siento, mi conexión está un poco lenta. ¿Podrías intentar de nuevo?";
       setMessages(prev => [...prev, { id: Date.now().toString(), sender: "bot", text: replyBody }]);
       
-      // Auto-speech
+      // Auto-speech (premium feature)
       if ('speechSynthesis' in window && replyBody) {
          const utterance = new SpeechSynthesisUtterance(replyBody);
          utterance.lang = 'es-MX';
@@ -105,7 +104,7 @@ export function AiChatbot() {
             setTimeout(() => { setIsOpen(false); toggleCart(); }, 2000);
           } else {
             setIsOpen(false);
-            openModal(() => toggleCart(), "Inicia sesión para continuar con tu pedido.");
+            openModal(() => toggleCart(), "Inicia sesión para finalizar tu orden premium.");
           }
         } else if (data.system_action.type === "OPEN_EVENT_MODAL") {
           setTimeout(() => { setIsOpen(false); window.location.hash = "#events"; }, 1000);
@@ -116,7 +115,7 @@ export function AiChatbot() {
             setIsOpen(false);
             openModal(
               () => window.dispatchEvent(new CustomEvent("open-reservation")),
-              "Necesitas iniciar sesión para reservar una mesa."
+              "Necesitas una cuenta para reservar en Asombro."
             );
           }
         }
@@ -128,107 +127,115 @@ export function AiChatbot() {
 
   return (
     <>
-      <button 
+      {/* Bot Launcher / Trigger */}
+      <motion.button 
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white shadow-[0_10px_30px_rgba(79,70,229,0.4)] hover:scale-110 transition-transform z-50 group"
+        className="fixed bottom-8 right-8 w-16 h-16 bg-black rounded-full flex items-center justify-center text-white shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-50 border border-white/10 group overflow-hidden"
       >
-        {isOpen ? <X size={28} /> : <MessageSquare size={28} />}
-        {!isOpen && <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>}
-      </button>
+        <div className="absolute inset-0 bg-gradient-to-tr from-[var(--color-brand-orange)] to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        {isOpen ? <X size={28} className="relative z-10" /> : <MessageSquare size={28} className="relative z-10" />}
+        {!isOpen && <span className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--color-brand-orange)] rounded-full border-2 border-black animate-pulse flex items-center justify-center text-[10px] font-black italic">1</span>}
+      </motion.button>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-28 right-6 w-[360px] h-[600px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden z-50 border border-gray-100"
+            initial={{ opacity: 0, y: 50, scale: 0.9, filter: "blur(20px)" }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: 50, scale: 0.9, filter: "blur(20px)" }}
+            className="fixed bottom-28 right-8 w-[380px] h-[640px] bg-white/80 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.2)] flex flex-col overflow-hidden z-50 border border-white/20"
           >
-            {/* Header */}
-            <div className="bg-indigo-600 text-white p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                 <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center relative shadow-inner">
-                    <Sparkles size={18} className="text-indigo-100"/>
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-indigo-600"></div>
+            {/* Header Glassmorphism */}
+            <div className="bg-black/90 text-white p-7 flex items-center justify-between border-b border-white/10 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-brand-orange)] rounded-full blur-[60px] opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+              
+              <div className="flex items-center gap-4 relative z-10">
+                 <div className="w-12 h-12 bg-neutral-800 rounded-2xl flex items-center justify-center relative shadow-2xl border border-white/10">
+                    <Zap size={24} className="text-[var(--color-brand-orange)]" fill="currentColor"/>
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-4 border-black"></div>
                  </div>
                  <div>
-                    <h3 className="font-bold text-sm tracking-wide">AsombroBot IA</h3>
-                    <p className="text-xs text-indigo-300">Asistente Virtual en línea</p>
+                    <h3 className="font-black text-lg italic tracking-tighter leading-none font-poppins">AsombroBot 🤖</h3>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-brand-orange)] mt-1 opacity-80">Concierge Inteligente</p>
                  </div>
               </div>
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-gray-50 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-white/30">
                {messages.map((msg) => (
                  <motion.div 
-                    initial={{ opacity: 0, x: msg.sender==='bot' ? -10 : 10 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
                     key={msg.id} 
                     className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                  >
-                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
+                    <div className={`max-w-[85%] rounded-[1.8rem] px-5 py-4 shadow-[0_5px_15px_rgba(0,0,0,0.03)] border transition-all ${
                        msg.sender === "user" 
-                       ? "bg-indigo-600 text-white rounded-tr-none" 
-                       : "bg-white border border-gray-100 text-gray-800 rounded-tl-none relative"
+                       ? "bg-black text-white rounded-tr-none border-white/10" 
+                       : "bg-white border-gray-100 text-gray-800 rounded-tl-none"
                     }`}>
-                       {msg.sender==='bot' && <span className="absolute -left-2 top-0 w-4 h-4 bg-white border-l border-t border-gray-100 transform -rotate-45"></span>}
-                       <p className="text-sm font-medium leading-snug">{msg.text}</p>
-                       <p className={`text-[10px] mt-1 text-right ${msg.sender === "user" ? "text-indigo-200" : "text-gray-400"}`}>
-                          12:00 PM {msg.sender === "user" && <CheckCircle2 size={10} className="inline ml-1"/>}
-                       </p>
+                       <p className="text-[14px] font-medium leading-relaxed font-poppins">{msg.text}</p>
+                       <div className={`flex items-center justify-end gap-1 mt-2 ${msg.sender === "user" ? "text-white/40" : "text-gray-300"}`}>
+                          <span className="text-[9px] font-black uppercase tracking-widest italic">12:00 PM</span>
+                          {msg.sender === "user" && <CheckCircle2 size={10} />}
+                       </div>
                     </div>
                  </motion.div>
                ))}
                
                {isTyping && (
                   <div className="flex justify-start">
-                     <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none px-4 py-3 flex gap-1 shadow-sm">
-                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></span>
-                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></span>
+                     <div className="bg-white border border-gray-100 rounded-[1.5rem] rounded-tl-none px-5 py-4 flex gap-1.5 shadow-sm">
+                        <span className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></span>
+                        <span className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></span>
+                        <span className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></span>
                      </div>
                   </div>
                )}
                <div ref={endOfMessagesRef} />
             </div>
 
-            {/* Suggestions */}
-            {messages.length < 3 && (
-               <div className="bg-white py-2 px-4 flex gap-2 overflow-x-auto hide-scrollbar">
-                  <button onClick={() => handleSend("¿Me puedes reservar una mesa?")} className="shrink-0 text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full hover:bg-indigo-100 border border-indigo-100">🎟️ Reservar Mesa</button>
-                  <button onClick={() => handleSend("¿Qué promociones hay hoy?")} className="shrink-0 text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full hover:bg-indigo-100 border border-indigo-100">🔥 Promociones</button>
-                  <button onClick={() => handleSend("Quiero pedir una Hawaiana grande")} className="shrink-0 text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full hover:bg-indigo-100 border border-indigo-100">🍕 Pedir Hawaiana</button>
+            {/* Suggestions Overlay */}
+            {messages.length < 5 && (
+               <div className="bg-white/50 backdrop-blur-md py-3 px-6 flex gap-3 overflow-x-auto hide-scrollbar border-t border-gray-50">
+                  <button onClick={() => handleSend("¿Me puedes reservar una mesa?")} className="shrink-0 text-[10px] font-black italic uppercase tracking-widest text-black bg-white border border-gray-200 px-4 py-2.5 rounded-full hover:bg-black hover:text-white transition-all shadow-sm">🎟️ Reserva</button>
+                  <button onClick={() => handleSend("¿Qué promociones hay hoy?")} className="shrink-0 text-[10px] font-black italic uppercase tracking-widest text-black bg-white border border-gray-200 px-4 py-2.5 rounded-full hover:bg-black hover:text-white transition-all shadow-sm">🔥 Promos</button>
+                  <button onClick={() => handleSend("Muestra el menú")} className="shrink-0 text-[10px] font-black italic uppercase tracking-widest text-black bg-white border border-gray-200 px-4 py-2.5 rounded-full hover:bg-black hover:text-white transition-all shadow-sm">🍕 Menú</button>
                </div>
             )}
 
-            {/* Input Form */}
+            {/* Input Form Premium */}
             <form 
               onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-              className="p-3 bg-white border-t border-gray-100 flex items-center gap-2"
+              className="p-5 pb-8 bg-white border-t border-gray-100 flex items-center gap-3"
             >
               <button 
                 type="button" 
                 onClick={toggleMic}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
               >
-                 <Mic size={18} />
+                 <Mic size={20} />
               </button>
               
-              <input 
-                type="text" 
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder={isListening ? "Escuchando..." : "Escribe un mensaje..."}
-                className="flex-1 bg-gray-100 rounded-full px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium"
-              />
+              <div className="flex-1 relative">
+                <input 
+                  type="text" 
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={isListening ? "Habla ahora..." : "Pregunta lo que quieras..."}
+                  className="w-full bg-gray-50 rounded-2xl px-5 py-3.5 text-sm outline-none focus:ring-2 focus:ring-[var(--color-brand-orange)]/20 transition-all font-bold placeholder:text-gray-300"
+                />
+              </div>
               
               <button 
                 type="submit" 
                 disabled={!input.trim()}
-                className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white disabled:opacity-50 hover:bg-indigo-700 hover:scale-105 transition-all shadow-md shadow-indigo-600/30"
+                className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center disabled:opacity-30 hover:bg-[var(--color-brand-orange)] transition-all shadow-xl shadow-black/10 active:scale-90"
               >
-                 <Send size={16} className="ml-1" />
+                 <Send size={18} className="translate-x-[2px] translate-y-[-1px]" />
               </button>
             </form>
           </motion.div>

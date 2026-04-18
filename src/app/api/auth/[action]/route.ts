@@ -36,7 +36,7 @@ export async function POST(req: Request, context: { params: Promise<{ action: st
       if (!isMatch) return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
 
       const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
-      return NextResponse.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+      return NextResponse.json({ token, user: { id: user.id, name: user.name, email: user.email, phone: user.phone, avatar: user.avatar } });
     }
 
     if (action === "me") {

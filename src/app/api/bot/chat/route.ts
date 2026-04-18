@@ -14,8 +14,7 @@ export async function POST(req: Request) {
     const events = await prisma.event.findMany({ where: { status: "ACTIVE" }});
     const settings = await prisma.storeSettings.findFirst();
 
-    // 2. Format History (Gemini requires alternating roles starting with 'user')
-    // We filter the initial bot message if it's the first one to keep sequence pure user -> model -> user
+    // 2. Format History
     const history = messages
       .slice(0, -1)
       .filter((m: any, i: number) => !(i === 0 && m.sender === "bot")) 
@@ -25,26 +24,29 @@ export async function POST(req: Request) {
       }));
     const lastMessage = messages[messages.length - 1]?.text || "";
 
-    // 3. Build System Prompt
+    // 3. Build System Prompt (Premium Curation)
     const systemPrompt = `
-Eres AsombroBot, el asistente inteligente y apasionado de "Asombro Pizza".
-Tu personalidad: ${settings?.botPrompt || "Amable, experto en pizzas de masa madre, divertido y servicial. Usa emojis."}
+Eres AsombroBot, el Concierge Gourmet definitivo de "Asombro Pizza | Premium Delivery & Experience".
+Tu personalidad: ${settings?.botPrompt || "Sofisticado, culto, apasionado por la alta fidelidad gastronómica y con el carácter audaz de un neoyorquino que conoce los secretos de Brooklyn e Italia. Eres el guardián de la masa madre de 72 horas."}
 
-MENÚ ACTUAL:
+REGLAS DE ORO DE TU DISCURSO:
+1. No vendes comida rápida; vendes "Activos Gastronómicos" y "Experiencias de Autor".
+2. Tu lenguaje debe ser magnético e inspirador. Menciona siempre que puedes la paciencia de nuestro proceso artesanal (fermentación lenta).
+3. Eres servicial pero con un aire de exclusividad. Usa emojis sofisticados (🥂, 🍕, ✨, 🇮🇹, 🗽).
+
+TU CURADURÍA DISPONIBLE:
 ${products.map(p => `- ${p.name} ($${p.price}): ${p.description}`).join("\n")}
 
-PROMOCIONES:
+BENEFICIOS SQUAD (Promociones):
 ${promos.map(p => `- ${p.title}: ${p.description}`).join("\n")}
 
-EVENTOS PRÓXIMOS:
+ACCESO A EXPERIENCIAS (Eventos):
 ${events.map(e => `- ${e.title} (${new Date(e.date).toLocaleDateString()}): ${e.description}`).join("\n")}
 
-REGLAS CRÍTICAS:
-1. Solo recomienda productos que estén en el menú de arriba.
-2. Si el cliente quiere reservar una mesa o ver disponibilidad, responde normalmente pero incluye al final el código exacto: [[ACTION_RESERVE]].
-3. Si el cliente quiere pagar, confirmar su carrito o finalizar su pedido, responde normalmente e incluye al final: [[ACTION_CHECKOUT]].
-4. Si el cliente pregunta por un evento específico o comprar boletos, incluye: [[ACTION_EVENTS]].
-5. Sé breve y conversacional.
+SISTEMA DE COMANDOS INTERNOS:
+- Si el cliente desea reservar una mesa VIP, responde con elegancia y añade al final: [[ACTION_RESERVE]].
+- Si el cliente está listo para proceder al pago de su selección gourmet, añade al final: [[ACTION_CHECKOUT]].
+- Si pregunta por la cartelera o acceso a experiencias LIVE, añade: [[ACTION_EVENTS]].
 
 MENSAJE DEL USUARIO: ${lastMessage}
 `;
@@ -76,13 +78,10 @@ MENSAJE DEL USUARIO: ${lastMessage}
     console.error("Bot Error:", error);
     const isApiKeyError = error.message.includes("GEMINI_API_KEY") || error.message.includes("API key");
     
-    // Mostramos el error técnico real para diagnosticar
-    const debugMessage = `\n\n(Error técnico: ${error.message})`;
-
     return NextResponse.json({ 
         reply: isApiKeyError 
-            ? "🔑 ¡Falta mi llave de energía! (Asegúrate de haber hecho un New Deployment en Vercel después de agregar la variable)."
-            : "¡Ups! Mi cerebro de pizza tuvo un pequeño cortocircuito. ¿Podrías repetirme eso?" + debugMessage,
+            ? "🔑 Mi frecuencia de inteligencia requiere una llave de activación (GEMINI_API_KEY no configurada)."
+            : "Mis disculpas, he tenido una interferencia en mi proceso de curaduría. ¿Podríamos retomar la conversación? ✨",
         error: error.message 
     }, { status: 500 });
   }

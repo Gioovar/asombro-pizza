@@ -22,7 +22,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Sesión inválida" }, { status: 401 });
     }
 
-    const { eventId, type = "GENERAL" } = await req.json();
+    const { eventId, type = "GENERAL", partySize = 1 } = await req.json();
 
     const event = await prisma.event.findUnique({
       where: { id: eventId }
@@ -54,6 +54,20 @@ export async function POST(req: Request) {
           event: true
       }
     });
+
+    // If it's a table reservation, sync with the Reservation model
+    if (type === "TABLE_RESERVATION") {
+       await prisma.reservation.create({
+          data: {
+             eventId,
+             userId,
+             partySize: parseInt(partySize.toString()),
+             time: event.date.toLocaleTimeString("es-MX", { hour: '2-digit', minute: '2-digit' }),
+             date: event.date,
+             status: "CONFIRMED"
+          }
+       });
+    }
 
     return NextResponse.json({
       success: true,

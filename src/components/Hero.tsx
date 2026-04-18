@@ -14,6 +14,8 @@ import { useAuth } from "../store/useAuth";
 import { useAuthGuardStore } from "../store/useAuthGuardStore";
 import Link from "next/link";
 import { ProductOptionsSelector } from "./menu/ProductOptionsSelector";
+import { UserBadge } from "./common/UserBadge";
+
 
 // Register ScrollTrigger
 if (typeof window !== "undefined") {
@@ -33,6 +35,7 @@ export function Hero() {
   const { addItem } = useCartStore();
   const { openModal } = useAuthGuardStore();
   const [selectingProduct, setSelectingProduct] = useState<MenuItem | null>(null);
+  const [hasMounted, setHasMounted] = useState(false);
 
   const handleReservar = () => {
     if (isAuthenticated()) {
@@ -88,6 +91,8 @@ export function Hero() {
       behavior: "smooth"
     });
 
+    setHasMounted(true);
+
     return () => {
       pin.kill();
       ScrollTrigger.getAll().forEach(t => t.kill());
@@ -126,17 +131,17 @@ export function Hero() {
             </button>
             <a href="#nosotros" className="hover:text-black hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300">Nuestra Masa</a>
             
-            {isAuthenticated() ? (
-              <Link href="/account" className="flex items-center gap-2 bg-black text-white px-5 py-2 rounded-full hover:bg-indigo-600 transition-all font-bold shadow-lg">
-                <UserIcon size={16} /> Mi Cuenta
-              </Link>
-            ) : (
+            {hasMounted && isAuthenticated() ? (
+              <UserBadge />
+            ) : hasMounted ? (
               <button 
                 onClick={() => setIsAuthOpen(true)}
                 className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2 rounded-full hover:bg-indigo-700 transition-all font-bold shadow-lg shadow-indigo-200"
               >
                 <UserIcon size={16} /> Ingresar
               </button>
+            ) : (
+                <div className="w-24 h-9 bg-gray-100/20 animate-pulse rounded-full" />
             )}
           </motion.nav>
         </header>

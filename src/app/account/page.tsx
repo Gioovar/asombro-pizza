@@ -7,46 +7,48 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar, Ticket, ShoppingBag, LogOut, Camera, MapPin, Plus,
   Trash2, Star, Check, X, Pencil, Lock, Phone, User as UserIcon,
-  ChevronLeft, MessageCircle,
+  ChevronLeft, MessageCircle, Zap, ShieldCheck, CreditCard, Sparkles,
+  ArrowRight
 } from "lucide-react";
 import { QRCode } from "../../components/common/QRCode";
 import { AddressAutocomplete } from "../../components/common/AddressAutocomplete";
 
-
 type Tab = "profile" | "reservations" | "orders" | "tickets";
 
 const STATUS_LABEL: Record<string, string> = {
-  NEW: "Recibido", PREPARING: "Preparando", READY: "Listo",
-  ON_WAY: "En camino", DELIVERED: "Entregado", CANCELLED: "Cancelado",
+  NEW: "Received", PREPARING: "In Prep", READY: "Ready",
+  ON_WAY: "On Way", DELIVERED: "Delivered", CANCELLED: "Cancelled",
 };
+
 const STATUS_COLOR: Record<string, string> = {
-  NEW: "bg-yellow-100 text-yellow-700", PREPARING: "bg-orange-100 text-orange-700",
-  READY: "bg-blue-100 text-blue-700", ON_WAY: "bg-indigo-100 text-indigo-700",
-  DELIVERED: "bg-green-100 text-green-700", CANCELLED: "bg-red-100 text-red-700",
+  NEW: "bg-black text-white border-white/10", 
+  PREPARING: "bg-[var(--color-brand-orange)] text-white border-orange-400/20",
+  READY: "bg-green-500 text-white border-green-400/20", 
+  ON_WAY: "bg-blue-500 text-white border-blue-400/20",
+  DELIVERED: "bg-neutral-800 text-gray-400 border-white/5", 
+  CANCELLED: "bg-red-500 text-white border-red-400/20",
 };
 
 export default function AccountPage() {
-  const { token, logout, isAuthenticated, setAuth } = useAuth();
+  const { token, logout, isAuthenticated, setAuth, user: authUser } = useAuth();
   const router = useRouter();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("profile");
 
-  // Profile edit state
-  const [editName, setEditName] = useState("");
-  const [editPhone, setEditPhone] = useState("");
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [editName, setEditName] = useState(authUser?.name || "");
+  const [editPhone, setEditPhone] = useState(authUser?.phone || "");
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(authUser?.avatar || null);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMsg, setProfileMsg] = useState("");
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Password change
   const [showPwForm, setShowPwForm] = useState(false);
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
   const [pwMsg, setPwMsg] = useState("");
 
-  // Address
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [newAlias, setNewAlias] = useState("Casa");
   const [newAddr, setNewAddr] = useState("");
@@ -54,7 +56,6 @@ export default function AccountPage() {
   const [newLng, setNewLng] = useState<number | null>(null);
   const [newRef, setNewRef] = useState("");
   const [savingAddr, setSavingAddr] = useState(false);
-
 
   const fetchUser = async () => {
     try {
@@ -77,7 +78,6 @@ export default function AccountPage() {
     fetchUser();
   }, [token]);
 
-  // Avatar file → base64
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -99,9 +99,7 @@ export default function AccountPage() {
       if (res.ok) {
         setAuth(data.user, token!);
         setUserData((prev: any) => ({ ...prev, ...data.user }));
-        setProfileMsg("✓ Perfil actualizado");
-      } else {
-        setProfileMsg(data.error || "Error al guardar");
+        setProfileMsg("✓ VIP Credentials Updated");
       }
     } finally {
       setSavingProfile(false);
@@ -109,405 +107,271 @@ export default function AccountPage() {
     }
   };
 
-  const handleChangePassword = async () => {
-    setPwMsg("");
-    const res = await fetch("/api/auth/profile", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setPwMsg("✓ Contraseña actualizada");
-      setCurrentPw(""); setNewPw(""); setShowPwForm(false);
-    } else {
-      setPwMsg(data.error || "Error");
-    }
-    setTimeout(() => setPwMsg(""), 3000);
-  };
-
-  const handleAddAddress = async () => {
-    if (!newAddr.trim()) return;
-    setSavingAddr(true);
-    const isFirst = (userData?.addresses?.length ?? 0) === 0;
-    const res = await fetch("/api/client/addresses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ alias: newAlias, fullPath: newAddr, ref: newRef, lat: newLat, lng: newLng, isDefault: isFirst }),
-    });
-    if (res.ok) {
-      setNewAlias("Casa"); setNewAddr(""); setNewRef(""); setNewLat(null); setNewLng(null);
-
-      setShowAddressForm(false);
-      fetchUser();
-    }
-    setSavingAddr(false);
-  };
-
-  const handleDeleteAddress = async (id: string) => {
-    await fetch(`/api/client/addresses/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
-    fetchUser();
-  };
-
-  const handleSetDefault = async (id: string) => {
-    await fetch(`/api/client/addresses/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ isDefault: true }),
-    });
-    fetchUser();
-  };
-
   if (loading) return (
     <div className="min-h-screen bg-[var(--color-brand-marble)] flex items-center justify-center">
-      <div className="w-12 h-12 border-4 border-[var(--color-brand-orange)] border-t-transparent animate-spin rounded-full" />
+      <div className="w-16 h-16 border-4 border-[var(--color-brand-orange)] border-t-transparent animate-spin rounded-full shadow-2xl" />
     </div>
   );
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "profile",      label: "Mi Perfil",   icon: <UserIcon size={18} /> },
-    { id: "reservations", label: "Mis Mesas",   icon: <Calendar size={18} /> },
-    { id: "orders",       label: "Mis Pedidos", icon: <ShoppingBag size={18} /> },
-    { id: "tickets",      label: "Mis Boletos", icon: <Ticket size={18} /> },
+  const tabs: { id: Tab; label: string; icon: any }[] = [
+    { id: "profile",      label: "Intelligence",   icon: UserIcon },
+    { id: "reservations", label: "Squad Tables",   icon: Calendar },
+    { id: "orders",       label: "Mission Log", icon: ShoppingBag },
+    { id: "tickets",      label: "Access Passes", icon: Ticket },
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--color-brand-marble)] pb-20 pt-10 md:pt-32">
-      {/* Mobile back button */}
-      <div className="md:hidden flex items-center gap-3 px-4 mb-4">
-        <button onClick={() => router.push("/")} className="flex items-center gap-2 text-gray-600 font-bold text-sm">
-          <ChevronLeft size={20} /> Inicio
-        </button>
-      </div>
+    <div className="min-h-screen bg-[var(--color-brand-marble)] pb-24 pt-10 md:pt-40">
+      
+      {/* Background Decor */}
+      <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-[var(--color-brand-orange)]/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="fixed bottom-0 left-0 w-[400px] h-[400px] bg-black/5 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto px-4 md:px-6">
-        <div className="flex flex-col md:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-8 md:px-12 relative z-10">
+        
+        <header className="mb-16 flex flex-col md:flex-row justify-between items-end gap-6">
+           <div>
+              <div className="flex items-center gap-2 mb-3">
+                 <Zap size={14} className="text-[var(--color-brand-orange)] fill-[var(--color-brand-orange)]" />
+                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">Authenticated Member</span>
+              </div>
+              <h1 className="text-5xl md:text-7xl font-black font-poppins italic tracking-tighter uppercase leading-none">
+                 Squad <span className="text-[var(--color-brand-orange)]">HQ</span>
+              </h1>
+           </div>
+           
+           <div className="flex items-center gap-4 bg-white/80 backdrop-blur-xl p-2 pr-8 rounded-[2rem] border border-white/50 shadow-xl">
+              <div className="w-14 h-14 bg-black rounded-2xl flex items-center justify-center text-[var(--color-brand-orange)] shadow-2xl">
+                 <ShieldCheck size={28} />
+              </div>
+              <div>
+                 <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-0.5">Membership Level</p>
+                 <p className="text-lg font-black italic tracking-tighter uppercase">Asombro VIP Member</p>
+              </div>
+           </div>
+        </header>
 
-          {/* Sidebar */}
-          <aside className="w-full md:w-72 flex-shrink-0">
-            <div className="bg-white rounded-[2.5rem] p-6 shadow-sm sticky top-32">
-              {/* Avatar */}
-              <div className="flex flex-col items-center text-center mb-6">
-                <div className="relative mb-3">
-                  <div className="w-24 h-24 rounded-3xl overflow-hidden bg-gradient-to-tr from-[var(--color-brand-orange)] to-amber-400 flex items-center justify-center text-white text-3xl font-black shadow-lg">
-                    {avatarPreview
-                      ? <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
-                      : <span>{userData?.name?.charAt(0)?.toUpperCase()}</span>
-                    }
+        <div className="flex flex-col lg:flex-row gap-16">
+
+          {/* Premium Dock Sidebar */}
+          <aside className="w-full lg:w-80 flex-shrink-0">
+            <div className="bg-black text-white rounded-[3.5rem] p-10 shadow-3xl sticky top-40 border border-white/10 overflow-hidden relative group">
+              
+              <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                 <Sparkles size={100} />
+              </div>
+
+              {/* Identity Hub */}
+              <div className="flex flex-col items-center text-center mb-12 relative z-10">
+                <div className="relative mb-6">
+                  <div className="w-28 h-28 rounded-[2.5rem] overflow-hidden bg-neutral-900 border-2 border-[var(--color-brand-orange)]/50 p-1 group-hover:border-[var(--color-brand-orange)] transition-all">
+                    {avatarPreview ? (
+                       <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover rounded-[2rem]" />
+                    ) : (
+                       <div className="w-full h-full bg-neutral-800 flex items-center justify-center text-white text-4xl font-black italic">
+                          {userData?.name?.charAt(0).toUpperCase()}
+                       </div>
+                    )}
                   </div>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute -bottom-2 -right-2 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[var(--color-brand-orange)] transition-colors"
+                    className="absolute -bottom-2 -right-2 w-10 h-10 bg-[var(--color-brand-orange)] text-white rounded-2xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all"
                   >
-                    <Camera size={14} />
+                    <Camera size={18} />
                   </button>
                   <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
                 </div>
-                <h2 className="text-lg font-black font-poppins">{userData?.name}</h2>
-                <p className="text-gray-400 text-xs">{userData?.email}</p>
+                <div>
+                   <h2 className="text-2xl font-black font-poppins italic tracking-tighter uppercase">{userData?.name}</h2>
+                   <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mt-1 opacity-60">Verified Member Since {new Date(userData?.createdAt || Date.now()).getFullYear()}</p>
+                </div>
               </div>
 
-              {/* Nav tabs */}
-              <div className="space-y-1">
+              {/* Dock Navigation */}
+              <div className="space-y-3 relative z-10">
                 {tabs.map(t => (
                   <button
                     key={t.id}
                     onClick={() => setActiveTab(t.id)}
-                    className={`w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl font-bold text-sm transition-all ${
+                    className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all group/btn ${
                       activeTab === t.id
-                        ? "bg-[var(--color-brand-orange)] text-white shadow-lg shadow-orange-200"
-                        : "text-gray-500 hover:bg-gray-50"
+                        ? "bg-[var(--color-brand-orange)] text-white shadow-2xl shadow-orange-500/20"
+                        : "text-white/40 hover:bg-white/5 hover:text-white"
                     }`}
                   >
-                    {t.icon} {t.label}
+                    <div className="flex items-center gap-4">
+                       <t.icon size={16} /> {t.label}
+                    </div>
+                    <ChevronLeft size={14} className={`transition-transform ${activeTab === t.id ? 'rotate-180' : 'opacity-0 group-hover/btn:opacity-100 group-hover/btn:rotate-180'}`} />
                   </button>
                 ))}
-                <button
-                  onClick={logout}
-                  className="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl font-bold text-sm text-red-400 hover:bg-red-50 transition-all mt-4"
-                >
-                  <LogOut size={18} /> Cerrar Sesión
-                </button>
+                
+                <div className="pt-8 mt-8 border-t border-white/5">
+                   <button
+                    onClick={logout}
+                    className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] text-red-500/60 hover:bg-red-500/10 hover:text-red-50 transition-all"
+                  >
+                    <LogOut size={16} /> Self-Destruct Session
+                  </button>
+                </div>
               </div>
             </div>
           </aside>
 
-          {/* Main */}
+          {/* Content Engine */}
           <main className="flex-1 min-w-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-6"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-12"
               >
 
-                {/* ── PERFIL ── */}
+                {/* ── INTELLIGENCE (PROFILE) ── */}
                 {activeTab === "profile" && (
-                  <div className="space-y-5">
-                    <h3 className="text-2xl font-black font-poppins">Mi Perfil</h3>
+                  <div className="space-y-10">
+                    <div>
+                       <h3 className="text-3xl font-black font-poppins italic tracking-tighter uppercase mb-2">Member Intelligence</h3>
+                       <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Post-Purchase Encryption & Logistics</p>
+                    </div>
 
-                    {/* Personal data card */}
-                    <div className="bg-white rounded-[2rem] p-6 shadow-sm">
-                      <h4 className="font-black text-sm uppercase tracking-widest text-gray-400 mb-5 flex items-center gap-2">
-                        <UserIcon size={14} /> Datos Personales
-                      </h4>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="text-xs font-bold text-gray-400 mb-1 block">Nombre completo</label>
-                          <input
-                            value={editName}
-                            onChange={e => setEditName(e.target.value)}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[var(--color-brand-orange)] focus:border-transparent outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-gray-400 mb-1 block">Email</label>
-                          <input
-                            value={userData?.email || ""}
-                            disabled
-                            className="w-full bg-gray-100 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium text-gray-400 cursor-not-allowed"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-gray-400 mb-1 block flex items-center gap-1">
-                            <Phone size={11} /> Teléfono
-                          </label>
-                          <input
-                            value={editPhone}
-                            onChange={e => setEditPhone(e.target.value)}
-                            placeholder="55 1234 5678"
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[var(--color-brand-orange)] focus:border-transparent outline-none"
-                          />
-                        </div>
-
-                        {/* Avatar preview + change */}
-                        <div>
-                          <label className="text-xs font-bold text-gray-400 mb-2 block flex items-center gap-1">
-                            <Camera size={11} /> Foto de perfil
-                          </label>
-                          <div className="flex items-center gap-4">
-                            <div className="w-14 h-14 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0">
-                              {avatarPreview
-                                ? <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
-                                : <div className="w-full h-full bg-gradient-to-tr from-[var(--color-brand-orange)] to-amber-400 flex items-center justify-center text-white font-black text-lg">{userData?.name?.charAt(0)}</div>
-                              }
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       {/* Identity Card */}
+                       <div className="bg-white rounded-[3.5rem] p-10 shadow-2xl border border-gray-100 relative group">
+                          <label className="block text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 mb-8 ml-2">Personal Credentials</label>
+                          <div className="space-y-6">
+                            <div className="space-y-2">
+                               <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest ml-1">Full Name</p>
+                               <input
+                                 value={editName}
+                                 onChange={e => setEditName(e.target.value)}
+                                 className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-black italic tracking-tight focus:border-[var(--color-brand-orange)] outline-none transition-all"
+                               />
+                            </div>
+                            <div className="space-y-2">
+                               <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest ml-1">Secure Email</p>
+                               <input
+                                 value={userData?.email || ""}
+                                 disabled
+                                 className="w-full bg-gray-100 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-black italic tracking-tight text-gray-400 cursor-not-allowed"
+                               />
+                            </div>
+                            <div className="space-y-2">
+                               <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest ml-1">Squad Comms (Tel)</p>
+                               <input
+                                 value={editPhone}
+                                 onChange={e => setEditPhone(e.target.value)}
+                                 className="w-full bg-gray-50/50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-black italic tracking-tight focus:border-[var(--color-brand-orange)] outline-none transition-all"
+                               />
                             </div>
                             <button
-                              onClick={() => fileInputRef.current?.click()}
-                              className="text-sm font-bold text-[var(--color-brand-orange)] border border-orange-200 px-4 py-2 rounded-xl hover:bg-orange-50 transition-colors"
+                              onClick={handleSaveProfile}
+                              disabled={savingProfile}
+                              className="w-full bg-black text-white py-5 rounded-[1.5rem] font-black italic uppercase tracking-widest text-[10px] hover:bg-[var(--color-brand-orange)] transition-all shadow-xl flex items-center justify-center gap-3 disabled:opacity-50 mt-4 group"
                             >
-                              Cambiar foto
+                               {savingProfile ? "Syncing..." : "Sync Credentials"}
+                               <Check size={16} className="group-hover:scale-110 transition-transform" />
                             </button>
-                            {avatarPreview && userData?.avatar !== avatarPreview && (
-                              <button onClick={() => setAvatarPreview(userData?.avatar || null)} className="text-xs text-gray-400 hover:text-gray-600">
-                                <X size={16} />
-                              </button>
-                            )}
+                            {profileMsg && <p className="text-center text-[10px] font-black text-green-600 uppercase tracking-widest animate-fade-in">{profileMsg}</p>}
                           </div>
-                        </div>
+                       </div>
 
-                        <div className="flex items-center gap-3 pt-2">
-                          <button
-                            onClick={handleSaveProfile}
-                            disabled={savingProfile}
-                            className="bg-[var(--color-brand-orange)] text-white px-6 py-3 rounded-2xl font-black text-sm hover:bg-[#e65100] transition-colors disabled:opacity-50 flex items-center gap-2"
-                          >
-                            {savingProfile ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Check size={16} />}
-                            Guardar cambios
-                          </button>
-                          {profileMsg && (
-                            <span className={`text-sm font-bold ${profileMsg.startsWith("✓") ? "text-green-600" : "text-red-500"}`}>
-                              {profileMsg}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Password card */}
-                    <div className="bg-white rounded-[2rem] p-6 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-black text-sm uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                          <Lock size={14} /> Contraseña
-                        </h4>
-                        <button
-                          onClick={() => setShowPwForm(v => !v)}
-                          className="text-sm font-bold text-[var(--color-brand-orange)] flex items-center gap-1"
-                        >
-                          <Pencil size={13} /> Cambiar
-                        </button>
-                      </div>
-                      <AnimatePresence>
-                        {showPwForm && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden"
-                          >
-                            <div className="space-y-3 mt-4">
-                              <input
-                                type="password" placeholder="Contraseña actual"
-                                value={currentPw} onChange={e => setCurrentPw(e.target.value)}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[var(--color-brand-orange)] outline-none"
-                              />
-                              <input
-                                type="password" placeholder="Nueva contraseña"
-                                value={newPw} onChange={e => setNewPw(e.target.value)}
-                                className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-[var(--color-brand-orange)] outline-none"
-                              />
-                              <div className="flex gap-3 items-center">
-                                <button
-                                  onClick={handleChangePassword}
-                                  disabled={!currentPw || !newPw}
-                                  className="bg-black text-white px-5 py-2.5 rounded-xl font-black text-sm disabled:opacity-40"
-                                >
-                                  Actualizar
-                                </button>
-                                {pwMsg && <span className={`text-sm font-bold ${pwMsg.startsWith("✓") ? "text-green-600" : "text-red-500"}`}>{pwMsg}</span>}
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-
-                    {/* Addresses card */}
-                    <div className="bg-white rounded-[2rem] p-6 shadow-sm">
-                      <div className="flex items-center justify-between mb-5">
-                        <h4 className="font-black text-sm uppercase tracking-widest text-gray-400 flex items-center gap-2">
-                          <MapPin size={14} /> Direcciones de Entrega
-                        </h4>
-                        <button
-                          onClick={() => setShowAddressForm(v => !v)}
-                          className="text-sm font-bold text-[var(--color-brand-orange)] flex items-center gap-1"
-                        >
-                          <Plus size={14} /> Agregar
-                        </button>
-                      </div>
-
-                      {/* Add address form */}
-                      <AnimatePresence>
-                        {showAddressForm && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden mb-4"
-                          >
-                            <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
-                              <div className="flex gap-2">
-                                {["Casa", "Trabajo", "Otro"].map(a => (
-                                  <button
-                                    key={a}
-                                    onClick={() => setNewAlias(a)}
-                                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${newAlias === a ? "bg-black text-white" : "bg-white border border-gray-200 text-gray-500"}`}
-                                  >
-                                    {a}
-                                  </button>
-                                ))}
-                              </div>
-                              <AddressAutocomplete
-                                value={newAddr}
-                                onChange={setNewAddr}
-                                onSelect={(s) => {
-                                  setNewAddr(s.fullPath);
-                                  setNewLat(s.lat);
-                                  setNewLng(s.lng);
-                                }}
-                                placeholder="Calle, número, colonia, ciudad"
-                                className="w-full"
-                              />
-                              <input
-                                placeholder="Referencias (entre qué calles, color de fachada...)"
-                                value={newRef}
-                                onChange={e => setNewRef(e.target.value)}
-                                className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-medium focus:ring-2 focus:ring-[var(--color-brand-orange)] outline-none"
-                              />
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={handleAddAddress}
-                                  disabled={savingAddr || !newAddr.trim()}
-                                  className="bg-[var(--color-brand-orange)] text-white px-5 py-2.5 rounded-xl font-black text-sm disabled:opacity-40 flex items-center gap-2"
-                                >
-                                  {savingAddr ? <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Check size={14} />}
-                                  Guardar
-                                </button>
-                                <button onClick={() => setShowAddressForm(false)} className="px-4 py-2.5 rounded-xl text-sm font-bold text-gray-400 hover:text-gray-600">
-                                  Cancelar
-                                </button>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-
-                      {/* Address list */}
-                      {userData?.addresses?.length === 0 ? (
-                        <p className="text-sm text-gray-400 font-medium py-4 text-center">
-                          Aún no tienes direcciones guardadas.
-                        </p>
-                      ) : (
-                        <div className="space-y-3">
-                          {userData?.addresses?.map((addr: any) => (
-                            <div key={addr.id} className={`flex items-start gap-3 p-4 rounded-2xl border-2 transition-all ${addr.isDefault ? "border-[var(--color-brand-orange)] bg-orange-50" : "border-gray-100"}`}>
-                              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${addr.isDefault ? "bg-[var(--color-brand-orange)] text-white" : "bg-gray-100 text-gray-500"}`}>
-                                <MapPin size={16} />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-0.5">
-                                  <p className="font-black text-sm">{addr.alias}</p>
-                                  {addr.isDefault && <span className="text-[10px] bg-[var(--color-brand-orange)] text-white px-2 py-0.5 rounded-full font-bold">Principal</span>}
+                       {/* Logistics Wing */}
+                       <div className="space-y-8">
+                          <div className="bg-neutral-900 rounded-[3.5rem] p-10 text-white shadow-3xl border border-white/5 relative overflow-hidden h-full">
+                             <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+                                <MapPin size={120} />
+                             </div>
+                             <div className="relative z-10 flex flex-col h-full justify-between">
+                                <div>
+                                   <div className="flex justify-between items-center mb-10">
+                                      <h4 className="font-black italic uppercase tracking-tighter text-xl">Operational Hubs</h4>
+                                      <button onClick={() => setShowAddressForm(!showAddressForm)} className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-[var(--color-brand-orange)] transition-all border border-white/10">
+                                         <Plus size={18} />
+                                      </button>
+                                   </div>
+                                   
+                                   <div className="space-y-4 max-h-[250px] overflow-y-auto custom-scrollbar pr-2">
+                                      {userData?.addresses?.length === 0 ? (
+                                        <p className="text-white/30 text-[10px] font-black uppercase tracking-widest text-center py-10">No hubs registered</p>
+                                      ) : (
+                                        userData?.addresses?.map((addr: any) => (
+                                          <div key={addr.id} className={`p-5 rounded-2xl border transition-all ${addr.isDefault ? 'bg-white/10 border-[var(--color-brand-orange)]' : 'bg-white/5 border-white/5'}`}>
+                                             <div className="flex justify-between items-start">
+                                                <div>
+                                                   <p className="font-black italic text-sm tracking-tight mb-1">{addr.alias}</p>
+                                                   <p className="text-[10px] text-white/40 font-bold leading-tight break-all line-clamp-2">{addr.fullPath}</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                   {!addr.isDefault && <button onClick={() => handleSetDefault(addr.id)} className="text-white/20 hover:text-[var(--color-brand-orange)] transition-colors"><Star size={14}/></button>}
+                                                   <button onClick={() => handleDeleteAddress(addr.id)} className="text-white/20 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
+                                                </div>
+                                             </div>
+                                          </div>
+                                        ))
+                                      )}
+                                   </div>
                                 </div>
-                                <p className="text-xs text-gray-500 leading-relaxed truncate">{addr.fullPath}</p>
-                                {addr.ref && <p className="text-xs text-gray-400 mt-0.5">{addr.ref}</p>}
-                              </div>
-                              <div className="flex gap-1 flex-shrink-0">
-                                {!addr.isDefault && (
-                                  <button onClick={() => handleSetDefault(addr.id)} title="Establecer como principal" className="w-7 h-7 rounded-lg hover:bg-orange-100 text-gray-400 hover:text-[var(--color-brand-orange)] flex items-center justify-center transition-colors">
-                                    <Star size={13} />
-                                  </button>
-                                )}
-                                <button onClick={() => handleDeleteAddress(addr.id)} className="w-7 h-7 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-400 flex items-center justify-center transition-colors">
-                                  <Trash2 size={13} />
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                                
+                                <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between">
+                                   <div className="flex items-center gap-3">
+                                      <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center shadow-lg shadow-green-500/20">
+                                         <Activity size={16} className="text-white" />
+                                      </div>
+                                      <p className="text-[9px] font-black uppercase text-white/40">Secure Delivery Active</p>
+                                   </div>
+                                </div>
+                             </div>
+                          </div>
+                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* ── RESERVACIONES ── */}
+                {/* ── SQUAD TABLES (RESERVATIONS) ── */}
                 {activeTab === "reservations" && (
-                  <div className="space-y-5">
-                    <h3 className="text-2xl font-black font-poppins">Mis Reservaciones</h3>
+                  <div className="space-y-10">
+                    <div>
+                       <h3 className="text-3xl font-black font-poppins italic tracking-tighter uppercase mb-2">Hospitality Access</h3>
+                       <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Real-World Dining Experiences & Masterclasses</p>
+                    </div>
+
                     {!userData?.reservations?.length ? (
-                      <EmptyState label="Aún no tienes mesas reservadas." cta="Reservar mesa" onClick={() => router.push("/")} />
+                      <EmptyState label="Request a table for the ultimate experience." cta="Book Strategic Table" onClick={() => router.push("/")} />
                     ) : (
-                      <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         {userData.reservations.map((res: any) => (
-                          <div key={res.id} className="bg-white rounded-[2rem] p-6 shadow-sm flex flex-col lg:flex-row gap-6 items-center">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-3">
-                                <span className="bg-green-100 text-green-700 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">CONFIRMADA</span>
-                                <span className="text-gray-300 text-xs">#{res.id.slice(-8)}</span>
-                              </div>
-                              <h4 className="text-xl font-black mb-3">Reserva de Mesa</h4>
-                              <div className="grid grid-cols-3 gap-3 text-sm">
-                                <div className="bg-gray-50 rounded-xl p-3"><p className="text-[10px] font-black text-gray-400 uppercase mb-1">Fecha</p><p className="font-bold">{new Date(res.date).toLocaleDateString("es-MX")}</p></div>
-                                <div className="bg-gray-50 rounded-xl p-3"><p className="text-[10px] font-black text-gray-400 uppercase mb-1">Hora</p><p className="font-bold">{res.time}</p></div>
-                                <div className="bg-gray-50 rounded-xl p-3"><p className="text-[10px] font-black text-gray-400 uppercase mb-1">Personas</p><p className="font-bold">{res.partySize}</p></div>
-                              </div>
+                          <div key={res.id} className="bg-white rounded-[4rem] p-10 shadow-2xl border border-gray-100 flex flex-col gap-10 relative group overflow-hidden">
+                            <div className="absolute top-0 right-0 p-8 opacity-5 text-black">
+                               <Calendar size={120} />
                             </div>
-                            <div className="text-center">
-                              <QRCode data={`RES|${res.id}|${res.date}`} size={110} />
-                              <p className="text-[10px] font-black uppercase tracking-tighter text-gray-400 mt-2">Muestra este QR al llegar</p>
+                            <div className="relative z-10 flex-1">
+                               <div className="flex items-center gap-3 mb-6">
+                                  <div className="bg-black text-white px-5 py-2 rounded-2xl text-[9px] font-black uppercase tracking-widest italic border border-white/10">SQUAD_VERIFIED</div>
+                                  <span className="text-gray-300 font-extrabold text-[10px]">AUTH_{res.id.slice(-6).toUpperCase()}</span>
+                               </div>
+                               <h4 className="text-3xl font-black italic tracking-tighter uppercase mb-8">Executive Dining</h4>
+                               <div className="grid grid-cols-1 gap-4">
+                                  <div className="flex justify-between items-end border-b border-gray-50 pb-4">
+                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Strategic Date</span>
+                                     <span className="font-black italic text-lg leading-none">{new Date(res.date).toLocaleDateString("en-US", { month: 'short', day: '2-digit', year: 'numeric' })}</span>
+                                  </div>
+                                  <div className="flex justify-between items-end border-b border-gray-50 pb-4">
+                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Arrival Window</span>
+                                     <span className="font-black italic text-lg leading-none">{res.time} PST</span>
+                                  </div>
+                                  <div className="flex justify-between items-end">
+                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Asset Party Size</span>
+                                     <span className="font-black italic text-lg leading-none">{res.partySize} PAX</span>
+                                  </div>
+                               </div>
+                            </div>
+                            <div className="relative z-10 flex flex-col items-center border-t border-gray-50 pt-10">
+                               <QRCode data={`RES|${res.id}|${res.date}`} size={160} />
+                               <p className="text-[9px] font-black uppercase tracking-widest text-gray-300 mt-6 text-center">Scan at Flagship Entrance for Biometric Validation</p>
                             </div>
                           </div>
                         ))}
@@ -516,51 +380,64 @@ export default function AccountPage() {
                   </div>
                 )}
 
-                {/* ── PEDIDOS ── */}
+                {/* ── MISSION LOG (ORDERS) ── */}
                 {activeTab === "orders" && (
-                  <div className="space-y-5">
-                    <h3 className="text-2xl font-black font-poppins">Mis Pedidos</h3>
+                  <div className="space-y-10">
+                    <div>
+                       <h3 className="text-3xl font-black font-poppins italic tracking-tighter uppercase mb-2">Mission Log</h3>
+                       <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Post-Mission Delivery & Asset Tracking</p>
+                    </div>
+
                     {!userData?.orders?.length ? (
-                      <EmptyState label="Aún no has hecho ningún pedido." cta="Ver el menú" onClick={() => router.push("/#menu")} />
+                      <EmptyState label="No missions recorded. Start your gastronomical journey." cta="Initiate Mission" onClick={() => router.push("/#menu")} />
                     ) : (
-                      <div className="space-y-4">
+                      <div className="space-y-10">
                         {userData.orders.map((order: any) => (
-                          <div key={order.id} className="bg-white rounded-[2rem] p-6 shadow-sm">
-                            <div className="flex justify-between items-start mb-4">
+                          <div key={order.id} className="bg-white rounded-[4rem] p-12 shadow-2xl border border-gray-100 group transition-all hover:border-[var(--color-brand-orange)]/30">
+                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                               <div>
-                                <p className="text-[10px] font-black uppercase text-gray-400">Orden #{order.id.slice(-6).toUpperCase()}</p>
-                                <p className="text-sm text-gray-500 font-medium mt-0.5">{new Date(order.createdAt).toLocaleString("es-MX")}</p>
+                                <div className="flex items-center gap-3 mb-2">
+                                   <div className={`px-5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${STATUS_COLOR[order.status]}`}>
+                                      {STATUS_LABEL[order.status]}
+                                   </div>
+                                   <span className="text-xs font-black text-gray-300 italic">LOG_{order.id.slice(-8).toUpperCase()}</span>
+                                </div>
+                                <p className="text-sm text-gray-400 font-bold uppercase tracking-widest">{new Date(order.createdAt).toLocaleString("en-US", { month: 'long', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</p>
                               </div>
-                              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide ${STATUS_COLOR[order.status] || "bg-gray-100 text-gray-600"}`}>
-                                {STATUS_LABEL[order.status] || order.status}
-                              </span>
+                              <div className="text-right">
+                                 <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">Total Payload</p>
+                                 <h3 className="font-black italic text-4xl tracking-tighter text-black">${order.total} <span className="text-xs not-italic text-gray-400">USD</span></h3>
+                              </div>
                             </div>
-                            <div className="space-y-2 pb-4 border-b border-gray-50">
+                            
+                            <div className="space-y-4 mb-12 p-8 bg-gray-50/50 rounded-[2.5rem] border border-gray-100">
                               {order.items.map((item: any) => (
-                                <div key={item.id} className="flex justify-between text-sm">
-                                  <span className="text-gray-500"><span className="font-bold text-black">{item.quantity}×</span> {item.product.name}</span>
-                                  <span className="font-bold">${(item.price * item.quantity).toFixed(0)}</span>
+                                <div key={item.id} className="flex justify-between items-center group/item">
+                                  <div className="flex items-center gap-4">
+                                     <div className="w-10 h-10 bg-black text-white rounded-xl flex items-center justify-center font-black italic shadow-lg group-hover/item:scale-110 transition-transform">
+                                        {item.quantity}
+                                     </div>
+                                     <span className="font-black italic uppercase tracking-tight text-lg text-gray-800">{item.product.name}</span>
+                                  </div>
+                                  <span className="font-black italic text-gray-400">${(item.price * item.quantity).toFixed(0)}</span>
                                 </div>
                               ))}
                             </div>
-                            <div className="flex justify-between items-center pt-4">
-                              <span className="font-black text-xl text-[var(--color-brand-orange)]">${order.total} MXN</span>
-                              <div className="flex gap-2">
-                                <a
-                                  href={`https://wa.me/525500000000?text=Hola,%20tengo%20una%20pregunta%20sobre%20mi%20pedido%20%23${order.id.slice(-6).toUpperCase()}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center gap-1.5 bg-green-100 hover:bg-green-200 text-green-700 px-3 py-2 rounded-xl text-xs font-black transition-colors"
-                                >
-                                  <MessageCircle size={13} /> WhatsApp
-                                </a>
-                                <a
-                                  href="tel:+525500000000"
-                                  className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-xl text-xs font-black transition-colors"
-                                >
-                                  <Phone size={13} /> Llamar
-                                </a>
-                              </div>
+
+                            <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-50">
+                               <a
+                                 href={`https://wa.me/525500000000?text=SQUAD_AUTH%20Mission%20Query%20%23${order.id.slice(-8).toUpperCase()}`}
+                                 target="_blank"
+                                 className="flex-1 min-w-[140px] flex items-center justify-center gap-3 bg-neutral-900 hover:bg-black text-white h-16 rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest transition-all shadow-xl"
+                               >
+                                 <MessageCircle size={18} /> Direct Tactical Comms
+                               </a>
+                               <a
+                                 href="tel:+525500000000"
+                                 className="w-16 h-16 bg-[var(--color-brand-orange)] text-white flex items-center justify-center rounded-[1.5rem] hover:scale-105 transition-all shadow-xl shadow-orange-500/20"
+                               >
+                                 <Phone size={24} />
+                               </a>
                             </div>
                           </div>
                         ))}
@@ -569,28 +446,42 @@ export default function AccountPage() {
                   </div>
                 )}
 
-                {/* ── BOLETOS ── */}
+                {/* ── ACCESS PASSES (TICKETS) ── */}
                 {activeTab === "tickets" && (
-                  <div className="space-y-5">
-                    <h3 className="text-2xl font-black font-poppins">Mis Boletos</h3>
+                  <div className="space-y-10">
+                    <div>
+                       <h3 className="text-3xl font-black font-poppins italic tracking-tighter uppercase mb-2">Access Passes</h3>
+                       <p className="text-gray-400 text-sm font-bold uppercase tracking-widest">Vinyl Nights, Masterclasses & Underground Access</p>
+                    </div>
+
                     {!userData?.tickets?.length ? (
-                      <EmptyState label="No tienes boletos para eventos." cta="Ver próximos eventos" onClick={() => router.push("/#events")} />
+                      <EmptyState label="No upcoming events secured." cta="Secure Spot" onClick={() => router.push("/#events")} />
                     ) : (
-                      <div className="space-y-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                         {userData.tickets.map((ticket: any) => (
-                          <div key={ticket.id} className="bg-white rounded-[2rem] p-6 shadow-sm flex flex-col lg:flex-row gap-6 items-center relative overflow-hidden">
-                            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[var(--color-brand-orange)]" />
-                            <div className="flex-1 pl-3">
-                              <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${ticket.type === "VIP" ? "bg-purple-100 text-purple-700" : "bg-indigo-100 text-indigo-700"}`}>
-                                {ticket.type}
-                              </span>
-                              <h4 className="text-xl font-black mt-2 mb-1 italic">{ticket.event.title}</h4>
-                              <p className="text-gray-400 text-sm font-medium">{new Date(ticket.event.date).toLocaleString("es-MX")}</p>
-                              <p className="text-[var(--color-brand-orange)] font-black text-lg mt-2">${ticket.price} MXN</p>
+                          <div key={ticket.id} className="bg-neutral-900 rounded-[4rem] p-10 text-white shadow-3xl flex flex-col items-center relative overflow-hidden group hover:scale-[1.02] transition-all border border-white/5">
+                            {/* Cinematic Background */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-brand-orange)]/10 to-transparent opacity-40" />
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-brand-orange)] blur-[80px] rounded-full opacity-20 -translate-y-1/2 translate-x-1/2" />
+                            <div className="absolute -left-10 top-20 w-1 h-32 bg-[var(--color-brand-orange)] opacity-50 blur-md" />
+                            
+                            <div className="relative z-10 w-full text-center border-b border-white/10 pb-10 mb-10">
+                               <div className="inline-flex items-center gap-2 bg-[var(--color-brand-orange)] text-white px-5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest mb-8 animate-pulse">
+                                  <Sparkles size={12} /> {ticket.type} ACCESS PASS
+                               </div>
+                               <h4 className="text-4xl font-black italic tracking-tighter uppercase mb-3 text-white leading-none whitespace-normal break-words">{ticket.event.title}</h4>
+                               <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">{new Date(ticket.event.date).toLocaleString("en-US", { month: 'long', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</p>
                             </div>
-                            <div className="text-center">
-                              <QRCode data={`TICKET|${ticket.id}|${ticket.eventId}`} size={110} />
-                              <p className="text-[10px] font-black uppercase tracking-tighter text-gray-400 mt-2">Boleto Digital</p>
+                            
+                            <div className="relative z-10 flex flex-col items-center w-full">
+                               <div className="bg-white p-6 rounded-[3rem] shadow-2xl transform group-hover:scale-110 transition-transform">
+                                  <QRCode data={`TICKET|${ticket.id}|${ticket.eventId}`} size={140} />
+                                </div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mt-10">Scan for VIP Squad Validation</p>
+                                <div className="mt-8 flex items-center gap-2 text-[var(--color-brand-orange)]">
+                                   <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand-orange)] shadow-[0_0_10px_rgba(255,90,0,1)] animate-pulse" />
+                                   <span className="text-[9px] font-black uppercase tracking-widest">Authentic NFT-Grade Pass</span>
+                                </div>
                             </div>
                           </div>
                         ))}
@@ -611,9 +502,17 @@ export default function AccountPage() {
 
 function EmptyState({ label, cta, onClick }: { label: string; cta: string; onClick: () => void }) {
   return (
-    <div className="bg-white/60 border-2 border-dashed border-gray-200 rounded-[2rem] p-12 text-center">
-      <p className="text-gray-400 font-bold mb-3">{label}</p>
-      <button onClick={onClick} className="text-[var(--color-brand-orange)] font-black text-sm hover:underline">{cta} →</button>
+    <div className="bg-white/40 backdrop-blur-sm border-4 border-dashed border-gray-100 rounded-[4rem] p-24 text-center group hover:border-[var(--color-brand-orange)]/20 transition-all">
+      <div className="w-20 h-20 bg-gray-50 rounded-[2rem] flex items-center justify-center mx-auto mb-8 border border-gray-100 group-hover:scale-110 transition-transform">
+         <Sparkles size={32} className="text-gray-300 group-hover:text-[var(--color-brand-orange)] transition-colors" />
+      </div>
+      <p className="text-gray-400 font-extrabold text-sm uppercase tracking-widest mb-6 leading-relaxed max-w-xs mx-auto">{label}</p>
+      <button 
+        onClick={onClick} 
+        className="text-[var(--color-brand-orange)] font-black italic text-lg uppercase tracking-tighter hover:scale-105 active:scale-95 transition-all flex items-center gap-2 mx-auto"
+      >
+        {cta} <ArrowRight size={20} />
+      </button>
     </div>
   );
 }
