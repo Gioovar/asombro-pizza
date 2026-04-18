@@ -56,6 +56,7 @@ async function main() {
     ]
   });
 
+  await prisma.product.createMany({
     data: [
       // 1. PIZZAS — ESPECIALIDADES (Sync with menuData)
       { 
