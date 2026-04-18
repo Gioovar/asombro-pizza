@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { menuData as pizzasData } from "../data/menuData";
+import { menuData as pizzasData, MenuItem } from "../data/menuData";
 import Image from "next/image";
 import { ShoppingCart, User as UserIcon } from "lucide-react";
 import { useCartStore } from "../store/useCartStore";
