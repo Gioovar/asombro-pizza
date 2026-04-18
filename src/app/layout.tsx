@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
+import { GlobalAuthModal } from "../components/GlobalAuthModal";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -57,6 +58,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground bg-[var(--color-bg)]">
         {children}
+        <GlobalAuthModal />
       </body>
     </html>
   );

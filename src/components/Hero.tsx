@@ -11,6 +11,7 @@ import { useCartStore } from "../store/useCartStore";
 import { ReservationModal } from "./ReservationModal";
 import { AuthModal } from "./auth/AuthModal";
 import { useAuth } from "../store/useAuth";
+import { useAuthGuardStore } from "../store/useAuthGuardStore";
 import Link from "next/link";
 import { ProductOptionsSelector } from "./menu/ProductOptionsSelector";
 
@@ -30,7 +31,28 @@ export function Hero() {
   
   const { isAuthenticated } = useAuth();
   const { addItem } = useCartStore();
+  const { openModal } = useAuthGuardStore();
   const [selectingProduct, setSelectingProduct] = useState<MenuItem | null>(null);
+
+  const handleReservar = () => {
+    if (isAuthenticated()) {
+      setIsReservationOpen(true);
+    } else {
+      openModal(() => setIsReservationOpen(true), "Para reservar tu mesa necesitas iniciar sesión.");
+    }
+  };
+
+  const handleOrderPizza = (pizza: MenuItem) => {
+    const doAdd = () => {
+      if (pizza.config) setSelectingProduct(pizza);
+      else addItem(pizza);
+    };
+    if (isAuthenticated()) {
+      doAdd();
+    } else {
+      openModal(doAdd, "Inicia sesión para agregar productos a tu carrito.");
+    }
+  };
 
   useEffect(() => {
     const trigger = triggerRef.current;
@@ -96,8 +118,8 @@ export function Hero() {
             <a href="#menu" className="hover:text-black hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300">Menú</a>
             <a href="#promos" className="hover:text-[var(--color-brand-orange)] hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300 font-bold bg-white/60 shadow-sm">Promociones 🔥</a>
             <a href="#events" className="hover:text-[var(--color-purple-600)] text-purple-600 hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300 font-bold">Eventos 🎟️</a>
-            <button 
-              onClick={() => setIsReservationOpen(true)}
+            <button
+              onClick={handleReservar}
               className="hover:text-black hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300"
             >
               Reserva 🍽️
@@ -142,8 +164,8 @@ export function Hero() {
                   
                   <div className="flex flex-wrap items-center gap-4 md:gap-6 pointer-events-auto">
                     <span className="text-3xl font-bold font-poppins">${activePizza.price}</span>
-                    <button 
-                      onClick={() => activePizza.config ? setSelectingProduct(activePizza) : addItem(activePizza)}
+                    <button
+                      onClick={() => handleOrderPizza(activePizza)}
                       className="bg-black text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-semibold hover:bg-[var(--color-brand-orange)] hover:scale-105 transition-all flex items-center gap-2 shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_10px_20px_rgba(255,90,0,0.3)]"
                     >
                       <ShoppingCart size={20} />

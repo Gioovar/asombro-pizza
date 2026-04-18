@@ -4,14 +4,24 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { menuData, MenuItem } from "../data/menuData";
 import { useCartStore } from "../store/useCartStore";
+import { useAuth } from "../store/useAuth";
+import { useAuthGuardStore } from "../store/useAuthGuardStore";
 import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 import { ProductOptionsSelector } from "./menu/ProductOptionsSelector";
 
 export function Menu() {
   const { addItem } = useCartStore();
+  const { isAuthenticated } = useAuth();
+  const { openModal } = useAuthGuardStore();
   const [activeCategory, setActiveCategory] = useState<string>("Todas");
   const [selectingProduct, setSelectingProduct] = useState<MenuItem | null>(null);
+
+  const handleSelectProduct = (item: MenuItem) => {
+    const doIt = () => setSelectingProduct(item);
+    if (isAuthenticated()) doIt();
+    else openModal(doIt, "Inicia sesión para personalizar y ordenar este producto.");
+  };
 
   const categories = [
     "Todas", 
@@ -81,12 +91,15 @@ export function Menu() {
       >
         <AnimatePresence mode="popLayout">
           {filteredItems.map((item, idx) => (
-            <MenuCard 
-              key={item.id} 
-              item={item} 
-              addItem={addItem} 
-              onSelect={() => setSelectingProduct(item)}
-              idx={idx} 
+            <MenuCard
+              key={item.id}
+              item={item}
+              addItem={(p) => {
+                if (isAuthenticated()) addItem(p);
+                else openModal(() => addItem(p), "Inicia sesión para agregar productos a tu carrito.");
+              }}
+              onSelect={() => handleSelectProduct(item)}
+              idx={idx}
             />
           ))}
         </AnimatePresence>

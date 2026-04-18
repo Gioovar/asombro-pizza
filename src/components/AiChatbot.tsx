@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, X, Send, Mic, Sparkles, Bot, User, CheckCircle2 } from "lucide-react";
 import { useCartStore } from "../store/useCartStore";
+import { useAuth } from "../store/useAuth";
+import { useAuthGuardStore } from "../store/useAuthGuardStore";
 
 interface ChatMessage {
   id: string;
@@ -21,6 +23,8 @@ export function AiChatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const { addItem, toggleCart } = useCartStore();
+  const { isAuthenticated } = useAuth();
+  const { openModal } = useAuthGuardStore();
   
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   
@@ -91,24 +95,31 @@ export function AiChatbot() {
 
       // Handle Function Calling
       if (data.system_action) {
-         if (data.system_action.type === "ADD_TO_CART") {
-             data.system_action.items.forEach((item: any) => addItem(item, 1));
-         } else if (data.system_action.type === "OPEN_CHECKOUT") {
-             setTimeout(() => {
-                setIsOpen(false);
-                toggleCart();
-             }, 2000);
-         } else if (data.system_action.type === "OPEN_EVENT_MODAL") {
-             setTimeout(() => {
-                setIsOpen(false);
-                window.location.hash = "#events";
-             }, 1000);
-         } else if (data.system_action.type === "OPEN_RESERVATION") {
-             setTimeout(() => {
-                setIsOpen(false);
-                window.dispatchEvent(new CustomEvent("open-reservation"));
-             }, 1000);
-         }
+        const authed = isAuthenticated();
+        if (data.system_action.type === "ADD_TO_CART") {
+          const doAdd = () => data.system_action.items.forEach((item: any) => addItem(item, 1));
+          if (authed) doAdd();
+          else { setIsOpen(false); openModal(doAdd, "Inicia sesión para agregar productos a tu carrito."); }
+        } else if (data.system_action.type === "OPEN_CHECKOUT") {
+          if (authed) {
+            setTimeout(() => { setIsOpen(false); toggleCart(); }, 2000);
+          } else {
+            setIsOpen(false);
+            openModal(() => toggleCart(), "Inicia sesión para continuar con tu pedido.");
+          }
+        } else if (data.system_action.type === "OPEN_EVENT_MODAL") {
+          setTimeout(() => { setIsOpen(false); window.location.hash = "#events"; }, 1000);
+        } else if (data.system_action.type === "OPEN_RESERVATION") {
+          if (authed) {
+            setTimeout(() => { setIsOpen(false); window.dispatchEvent(new CustomEvent("open-reservation")); }, 1000);
+          } else {
+            setIsOpen(false);
+            openModal(
+              () => window.dispatchEvent(new CustomEvent("open-reservation")),
+              "Necesitas iniciar sesión para reservar una mesa."
+            );
+          }
+        }
       }
     } catch(e) {
       setIsTyping(false);

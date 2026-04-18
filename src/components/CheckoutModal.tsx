@@ -5,11 +5,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Minus, Plus, ShoppingBag, ArrowRight, CheckCircle, MapPin, CreditCard, UserCircle, DollarSign, ChevronLeft } from "lucide-react";
 import { useCartStore } from "../store/useCartStore";
 import { useUserStore } from "../store/useUserStore";
+import { useAuth } from "../store/useAuth";
+import { useAuthGuardStore } from "../store/useAuthGuardStore";
 import Image from "next/image";
 
 export function CheckoutModal() {
   const { isCartOpen, toggleCart, items, updateQuantity, removeItem, getTotalPrice, appliedPromo } = useCartStore();
   const { user, token, setUser, addAddress, addPayment } = useUserStore();
+  const { isAuthenticated } = useAuth();
+  const { openModal } = useAuthGuardStore();
   const clearCart = () => items.forEach(i => removeItem(i.cartItemId));
 
   // Flow State
@@ -26,10 +30,58 @@ export function CheckoutModal() {
   const [authName, setAuthName] = useState("");
   const [tempAddress, setTempAddress] = useState("");
   const [tempPayment, setTempPayment] = useState("");
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsError, setGpsError] = useState("");
+  const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  const handleUseGPS = () => {
+    if (!navigator.geolocation) {
+      setGpsError("Tu navegador no soporta geolocalización.");
+      return;
+    }
+    setGpsLoading(true);
+    setGpsError("");
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        setMapCoords({ lat, lng });
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+            { headers: { "Accept-Language": "es" } }
+          );
+          const data = await res.json();
+          const addr =
+            data.display_name ||
+            `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          setTempAddress(addr);
+        } catch {
+          setTempAddress(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+        } finally {
+          setGpsLoading(false);
+        }
+      },
+      (err) => {
+        setGpsLoading(false);
+        if (err.code === err.PERMISSION_DENIED)
+          setGpsError("Permiso de ubicación denegado. Escribe tu dirección.");
+        else
+          setGpsError("No se pudo obtener la ubicación. Escribe tu dirección.");
+      },
+      { timeout: 10000 }
+    );
+  };
 
   const handleNextStep = () => {
-     if (step === 1 && items.length > 0) setStep(2);
-     else if (step === 2) setStep(3);
+    if (step === 1 && items.length > 0) {
+      if (!isAuthenticated()) {
+        openModal(() => setStep(2), "Inicia sesión para continuar con tu pedido.");
+        return;
+      }
+      setStep(2);
+    } else if (step === 2) {
+      setStep(3);
+    }
   };
 
   const handleCheckoutFinished = async () => {
@@ -200,12 +252,24 @@ export function CheckoutModal() {
                               <input placeholder="Buscar en maps... ej: Calle 5, Reforma" value={tempAddress} onChange={e=>setTempAddress(e.target.value)} className="w-full pl-10 pr-4 py-4 bg-white border border-gray-200 rounded-2xl shadow-sm focus:border-black outline-none font-medium" />
                               <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-black/40" />
                               <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                                <button className="bg-black text-white text-xs px-3 py-1.5 rounded-lg hover:bg-gray-800 transition-colors font-bold">Usar GPS</button>
+                                <button onClick={handleUseGPS} disabled={gpsLoading} className="bg-black text-white text-xs px-3 py-1.5 rounded-lg hover:bg-gray-800 transition-colors font-bold disabled:opacity-60">
+                                {gpsLoading ? "Localizando..." : "Usar GPS"}
+                              </button>
                               </div>
                            </div>
-                           {/* Fake Map Frame */}
+                           {gpsError && <p className="mt-2 text-xs text-red-500 font-medium">{gpsError}</p>}
+                           {/* Map Frame — updates with GPS or defaults to CDMX */}
                            <div className="mt-3 w-full h-32 bg-gray-200 rounded-2xl overflow-hidden relative border border-gray-200 grayscale opacity-80">
-                              <iframe width="100%" height="100%" src="https://maps.google.com/maps?width=100%25&amp;height=600&amp;hl=en&amp;q=CDMX+(Tu%20Ubicacion)&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed" frameBorder="0" scrolling="no" marginHeight={0} marginWidth={0}></iframe>
+                              <iframe
+                                key={mapCoords ? `${mapCoords.lat},${mapCoords.lng}` : "default"}
+                                width="100%"
+                                height="100%"
+                                src={mapCoords
+                                  ? `https://maps.google.com/maps?q=${mapCoords.lat},${mapCoords.lng}&z=16&output=embed`
+                                  : "https://maps.google.com/maps?q=CDMX&z=14&output=embed"
+                                }
+                                style={{ border: 0 }}
+                              />
                            </div>
                         </div>
                      </div>

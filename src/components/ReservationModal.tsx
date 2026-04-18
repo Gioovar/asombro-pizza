@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Calendar as CalendarIcon, Clock, Users, CheckCircle2, ChevronRight, ChevronLeft, AlertCircle } from "lucide-react";
 import { useAuth } from "../store/useAuth";
+import { useAuthGuardStore } from "../store/useAuthGuardStore";
 
 interface ReservationModalProps {
   isOpen: boolean;
@@ -11,7 +12,8 @@ interface ReservationModalProps {
 }
 
 export function ReservationModal({ isOpen, onClose }: ReservationModalProps) {
-  const { token } = useAuth();
+  const { token, isAuthenticated } = useAuth();
+  const { openModal } = useAuthGuardStore();
   const [step, setStep] = useState(1);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -35,6 +37,10 @@ export function ReservationModal({ isOpen, onClose }: ReservationModalProps) {
   };
 
   const handleConfirm = async () => {
+    if (!isAuthenticated()) {
+      openModal(handleConfirm, "Inicia sesión para confirmar tu reservación.");
+      return;
+    }
     setIsProcessing(true);
     setError("");
     
