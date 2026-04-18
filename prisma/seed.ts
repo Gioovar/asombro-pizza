@@ -162,10 +162,9 @@ async function main() {
   console.log("Configurando Core Business...");
   await prisma.storeSettings.create({
      data: {
-        storeName: "Asombro Pizza | Flagship",
-        isOpen: true,
         deliveryFee: 45,
-        minOrder: 250,
+        minOrderTotal: 250,
+        botEnabled: true,
         botPrompt: "Eres un Concierge Gourmet. Tu tono es sofisticado, experto en gastronomía y apasionado por la cultura de Brooklyn. Vende la experiencia de la masa madre de 72h como un lujo necesario."
      }
   });
