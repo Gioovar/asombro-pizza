@@ -130,7 +130,6 @@ async function main() {
         title: "Brooklyn Vinyl Night", 
         description: "Una noche de Jazz y Vinilos seleccionados por DJ Asombro. Cata de pizzas de autor incluida.", 
         date: new Date(Date.now() + 86400000 * 5), // +5 days
-        location: "Flagship Store CDMX",
         capacity: 40,
         price: 250,
         category: "LIVE_MUSIC",
@@ -141,7 +140,6 @@ async function main() {
         title: "Masterclass: Masa Madre", 
         description: "Aprende el arte de la fermentación de 72h con nuestro Maestro Pizzero. Cupo ultra limitado.", 
         date: new Date(Date.now() + 86400000 * 12), // +12 days
-        location: "Studio Kitchen",
         capacity: 12,
         price: 850,
         category: "ACADEMY",
