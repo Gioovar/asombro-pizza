@@ -14,8 +14,35 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Asombro Pizza | Premium Delivery",
-  description: "Experience the ultimate pizza delivery with Asombro Pizza.",
+  title: "Asombro Pizza | Premium Delivery & Experience",
+  description: "Disfruta el sabor auténtico de Asombro Pizza. Pizzas premium, burgers artesanales, alitas, cervezas y más. ¡Pide online para delivery o reserva tu lugar!",
+  keywords: ["pizza", "delivery", "burgers", "alitas", "asombro pizza", "comida a domicilio"],
+  openGraph: {
+    title: "Asombro Pizza | Premium Delivery & Experience",
+    description: "La mejor pizza de la ciudad con ingredientes premium. ¡Pide ahora!",
+    url: "https://asombropizza.com",
+    siteName: "Asombro Pizza",
+    images: [
+      {
+        url: "/lo asombro.png",
+        width: 1200,
+        height: 630,
+        alt: "Asombro Pizza Logo",
+      },
+    ],
+    locale: "es_MX",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Asombro Pizza | Premium Delivery",
+    description: "Pizzas, Burgers y Alitas Premium. ¡Pide online!",
+    images: ["/lo asombro.png"],
+  },
+  icons: {
+    icon: "/lo asombro.png",
+    apple: "/lo asombro.png",
+  },
 };
 
 export default function RootLayout({
