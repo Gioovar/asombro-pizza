@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Save, Trash2, AlertCircle, Info, Zap, Sparkles, Code, DollarSign, Image as ImageIcon } from "lucide-react";
+import { X, Save, Trash2, AlertCircle, Info, Zap, Sparkles, Code, DollarSign, Image as ImageIcon, PieChart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ProductEditorModalProps {
