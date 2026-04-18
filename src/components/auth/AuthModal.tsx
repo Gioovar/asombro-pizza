@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, User, Phone, ArrowRight, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
+import { X, Mail, Lock, User, Phone, ArrowRight, Loader2, AlertCircle, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../store/useAuth";
 import Image from "next/image";
 
@@ -16,6 +16,9 @@ interface AuthModalProps {
 export function AuthModal({ isOpen, onClose, onSuccess, intentMessage }: AuthModalProps) {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [formData, setFormData] = useState({ name: "", email: "", password: "", phone: "" });
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -23,8 +26,12 @@ export function AuthModal({ isOpen, onClose, onSuccess, intentMessage }: AuthMod
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
+    if (mode === "register" && formData.password !== confirmPassword) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+    setIsLoading(true);
 
     try {
       const response = await fetch(`/api/auth/${mode}`, {
@@ -56,6 +63,9 @@ export function AuthModal({ isOpen, onClose, onSuccess, intentMessage }: AuthMod
   const switchMode = (m: "login" | "register") => {
     setMode(m);
     setError("");
+    setConfirmPassword("");
+    setShowPassword(false);
+    setShowConfirm(false);
   };
 
   if (!isOpen) return null;
@@ -167,14 +177,49 @@ export function AuthModal({ isOpen, onClose, onSuccess, intentMessage }: AuthMod
               <div className="relative">
                 <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   placeholder="Contraseña"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-4 py-3.5 text-sm font-medium text-black focus:ring-2 focus:ring-[var(--color-brand-orange)] focus:border-transparent outline-none transition-all"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-11 pr-11 py-3.5 text-sm font-medium text-black focus:ring-2 focus:ring-[var(--color-brand-orange)] focus:border-transparent outline-none transition-all"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
+
+              {mode === "register" && (
+                <div className="relative">
+                  <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type={showConfirm ? "text" : "password"}
+                    required
+                    placeholder="Confirmar contraseña"
+                    className={`w-full bg-gray-50 border rounded-2xl pl-11 pr-11 py-3.5 text-sm font-medium text-black focus:ring-2 focus:ring-[var(--color-brand-orange)] focus:border-transparent outline-none transition-all ${
+                      confirmPassword && confirmPassword !== formData.password
+                        ? "border-red-300 bg-red-50"
+                        : "border-gray-200"
+                    }`}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(v => !v)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                  {confirmPassword && confirmPassword !== formData.password && (
+                    <p className="text-xs text-red-500 font-medium mt-1 ml-1">Las contraseñas no coinciden</p>
+                  )}
+                </div>
+              )}
 
               {error && (
                 <div className="bg-red-50 border border-red-100 p-3.5 rounded-2xl flex items-center gap-3 text-red-600 text-sm">
