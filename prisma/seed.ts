@@ -161,7 +161,7 @@ async function main() {
         deliveryFee: 45,
         minOrderTotal: 250,
         botEnabled: true,
-        botPrompt: "Eres un Concierge Gourmet. Tu tono es sofisticado, experto en gastronomía y apasionado por la cultura de Brooklyn. Vende la experiencia de la masa madre de 72h como un lujo necesario."
+        botPrompt: "Eres el Concierge de Asombro Pizza. Tu tono es sofisticado pero extremadamente directo y ejecutivo. Evita saludos largos o explicaciones innecesarias. Tu objetivo es recomendar una opción y cerrar la venta de forma breve. Sé táctico y resolutivo."
      }
   });
 

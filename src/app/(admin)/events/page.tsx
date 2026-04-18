@@ -110,7 +110,7 @@ export default function EventsAdminPage() {
                         </div>
                         <div>
                           <p className="font-bold text-gray-900 leading-tight mb-0.5">{evt.title}</p>
-                          <p className="text-xs font-bold text-gray-400 italic">{evt.price === 0 ? 'FREE COVER' : `$${evt.price} / BOLETO`}</p>
+                          <p className="text-xs font-bold text-gray-400 italic">{evt.price === 0 ? 'ACCESO LIBRE' : `$${evt.price} / BOLETO`}</p>
                         </div>
                       </div>
                     </td>
@@ -139,7 +139,7 @@ export default function EventsAdminPage() {
                     <td className="px-8 py-6 text-center">
                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black italic uppercase tracking-widest inline-flex items-center gap-1.5 ${evt.status==='ACTIVE' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-100 text-gray-400'}`}>
                           {evt.status==='ACTIVE' && <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>}
-                          {evt.status}
+                          {evt.status === 'ACTIVE' ? 'ACTIVO' : evt.status}
                        </span>
                     </td>
                     <td className="px-8 py-6 text-center">
