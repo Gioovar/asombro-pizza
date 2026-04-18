@@ -107,6 +107,32 @@ export default function AccountPage() {
     }
   };
 
+  const handleSetDefault = async (id: string) => {
+    try {
+      const res = await fetch(`/api/client/addresses/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ isDefault: true }),
+      });
+      if (res.ok) fetchUser();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteAddress = async (id: string) => {
+    if (!confirm("¿Deseas eliminar este Hub Operativo?")) return;
+    try {
+      const res = await fetch(`/api/client/addresses/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) fetchUser();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   if (loading) return (
     <div className="min-h-screen bg-[var(--color-brand-marble)] flex items-center justify-center">
       <div className="w-16 h-16 border-4 border-[var(--color-brand-orange)] border-t-transparent animate-spin rounded-full shadow-2xl" />
