@@ -47,7 +47,7 @@ export default function DriverEarnings() {
                <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1 leading-none">Puntos SQUAD</p>
                <div className="flex items-center gap-2">
                   <p className="font-black text-2xl italic">1,240</p>
-                  <zap size={16} className="text-[var(--color-brand-orange)]" />
+                  <Zap size={16} className="text-[var(--color-brand-orange)]" />
                </div>
             </div>
          </div>
