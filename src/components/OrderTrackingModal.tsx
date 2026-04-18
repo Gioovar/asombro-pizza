@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, CheckCircle2, ChefHat, Bike, PackageCheck, Clock, MapPin } from "lucide-react";
+import { X, CheckCircle2, ChefHat, Bike, PackageCheck, Clock, MapPin, Phone, ChevronLeft } from "lucide-react";
 import { useAuth } from "../store/useAuth";
 
 interface OrderTrackingModalProps {
@@ -114,23 +114,31 @@ export function OrderTrackingModal({ orderId, onClose }: OrderTrackingModalProps
         className="bg-white w-full sm:max-w-md rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl max-h-[92vh] flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
-          <div>
-            <h2 className="text-xl font-black font-poppins">Tu Pedido</h2>
-            <p className="text-xs text-gray-400 font-mono">#{orderId.slice(-8).toUpperCase()}</p>
+        <div className="px-6 pt-5 pb-4 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <button onClick={onClose} className="flex items-center gap-1.5 text-gray-400 hover:text-black transition-colors font-bold text-sm">
+              <ChevronLeft size={18} /> Volver
+            </button>
+            <div className="flex items-center gap-2">
+              {order && (
+                <div className="flex items-center gap-1.5 bg-orange-50 text-[var(--color-brand-orange)] px-3 py-1.5 rounded-full">
+                  <Clock size={13} />
+                  <span className="text-xs font-black">{ETA[order.status]}</span>
+                </div>
+              )}
+              {/* Llamar a la sucursal */}
+              <a
+                href="tel:+525500000000"
+                className="w-9 h-9 flex items-center justify-center bg-green-100 hover:bg-green-200 text-green-600 rounded-full transition-colors"
+                title="Llamar a la sucursal"
+              >
+                <Phone size={16} />
+              </a>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            {order && (
-              <div className="flex items-center gap-1.5 bg-orange-50 text-[var(--color-brand-orange)] px-3 py-1.5 rounded-full">
-                <Clock size={13} />
-                <span className="text-xs font-black">{ETA[order.status]}</span>
-              </div>
-            )}
-            {isDelivered && (
-              <button onClick={onClose} className="w-9 h-9 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full transition-colors">
-                <X size={18} />
-              </button>
-            )}
+          <div className="mt-2">
+            <h2 className="text-xl font-black font-poppins">Seguimiento de Pedido</h2>
+            <p className="text-xs text-gray-400 font-mono">#{orderId.slice(-8).toUpperCase()}</p>
           </div>
         </div>
 
