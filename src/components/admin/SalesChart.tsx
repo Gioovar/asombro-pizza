@@ -59,7 +59,7 @@ export function SalesChart({ data }: { data: ChartData[] }) {
             fill="url(#colorSales)"
             animationDuration={2000}
             dot={{ r: 4, fill: '#FF5A00', strokeWidth: 2, stroke: '#fff' }}
-            activeDot={{ r: 8, fill: '#FF5A00', strokeWidth: 2, stroke: '#fff', shadow: '0 0 10px rgba(255,90,0,0.5)' }}
+            activeDot={{ r: 8, fill: '#FF5A00', strokeWidth: 2, stroke: '#fff' }}
           />
         </AreaChart>
       </ResponsiveContainer>
