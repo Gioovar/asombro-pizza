@@ -5,6 +5,7 @@ import { AiChatbot } from "@/components/AiChatbot";
 import { CheckoutModal } from "@/components/CheckoutModal";
 import { PromotionSlider } from "@/components/promos/PromotionSlider";
 import { EventSlider } from "@/components/events/EventSlider";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -30,9 +31,9 @@ export default function Home() {
       
       {/* Footer */}
       <footer className="bg-black text-white py-12 text-center mt-20 relative z-10 border-t border-gray-900">
-        <p className="font-poppins font-black text-2xl tracking-tighter mb-4 text-[var(--color-brand-orange)]">
-          ASOMBRO.
-        </p>
+        <div className="flex justify-center mb-4">
+          <Image src="/images/logo.svg" alt="Asombro Pizza" width={160} height={52} className="brightness-0 invert" />
+        </div>
         <p className="text-gray-400 text-sm">
           © {new Date().getFullYear()} Asombro Pizza. Todos los derechos reservados.
         </p>

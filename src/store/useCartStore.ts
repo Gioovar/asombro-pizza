@@ -1,15 +1,17 @@
 import { create } from "zustand";
-import { Pizza } from "../data/pizzas";
+import { MenuItem } from "../data/menuData";
 
-export interface CartItem extends Pizza {
+export interface CartItem extends MenuItem {
   quantity: number;
+  selectedOptions?: Record<string, any>;
+  cartItemId: string; // Unique ID for this specific combination
 }
 
 interface PromoState {
   id: string;
   code: string;
   discount: number;
-  type: string; // 'PERCENTAGE' | 'FLAT' | 'COMBO' | 'TWO_FOR_ONE'
+  type: string;
 }
 
 interface CartStore {
@@ -17,9 +19,9 @@ interface CartStore {
   toggleCart: () => void;
   items: CartItem[];
   appliedPromo: PromoState | null;
-  addItem: (product: any, quantity?: number) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  removeItem: (id: string) => void;
+  addItem: (product: MenuItem, quantity?: number, options?: Record<string, any>) => void;
+  updateQuantity: (cartItemId: string, quantity: number) => void;
+  removeItem: (cartItemId: string) => void;
   getTotalPrice: () => number;
   applyPromo: (promo: PromoState | null) => void;
   getTotalItems: () => number;
@@ -31,12 +33,23 @@ export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
   appliedPromo: null,
   
-  addItem: (product, quantity = 1) => set((state) => {
-    const existing = state.items.find(i => i.id === product.id);
+  addItem: (product, quantity = 1, options = {}) => set((state) => {
+    // Unique ID for the cart item based on product and selected options
+    const cartItemId = `${product.id}-${JSON.stringify(options)}`;
+    
+    const existing = state.items.find(i => i.cartItemId === cartItemId);
     if (existing) {
-       return { items: state.items.map(i => i.id === product.id ? { ...i, quantity: i.quantity + quantity } : i) };
+       return { items: state.items.map(i => i.cartItemId === cartItemId ? { ...i, quantity: i.quantity + quantity } : i) };
     }
-    return { items: [...state.items, { ...product, quantity }] };
+    
+    const newItem: CartItem = {
+      ...product,
+      quantity,
+      selectedOptions: options,
+      cartItemId
+    };
+    
+    return { items: [...state.items, newItem] };
   }),
   
   updateQuantity: (id, quantity) => set((state) => ({

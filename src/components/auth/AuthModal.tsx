@@ -84,7 +84,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     type="text" 
                     required 
                     placeholder="Nombre Completo"
-                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-medium focus:ring-2 focus:ring-indigo-600 outline-none transition-all"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-medium text-black focus:ring-2 focus:ring-indigo-600 outline-none transition-all"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
@@ -97,7 +97,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   type="email" 
                   required 
                   placeholder="Tu e-mail"
-                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-medium focus:ring-2 focus:ring-indigo-600 outline-none transition-all"
+                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-medium text-black focus:ring-2 focus:ring-indigo-600 outline-none transition-all"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                 />
@@ -109,7 +109,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <input 
                     type="tel" 
                     placeholder="Teléfono (opcional)"
-                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-medium focus:ring-2 focus:ring-indigo-600 outline-none transition-all"
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-medium text-black focus:ring-2 focus:ring-indigo-600 outline-none transition-all"
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   />
@@ -122,7 +122,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   type="password" 
                   required 
                   placeholder="Contraseña"
-                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-medium focus:ring-2 focus:ring-indigo-600 outline-none transition-all"
+                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-12 pr-4 py-4 text-sm font-medium text-black focus:ring-2 focus:ring-indigo-600 outline-none transition-all"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />

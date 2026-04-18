@@ -3,9 +3,15 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  order     Int       @default(0)
+  products  Product[]
 }
 
 model Product {
@@ -14,8 +20,13 @@ model Product {
   description String
   image       String
   cost        Float
-  price       Float
-  category    String   @default("Pizza")
+  price       Float    // Base Price
+  config      String?   // JSON configuration for options (Sizes, Flavors, etc.)
+  
+  categoryId  String?
+  categoryRel Category? @relation(fields: [categoryId], references: [id])
+  category    String    @default("Pizza") // Legacy support / convenience
+  
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

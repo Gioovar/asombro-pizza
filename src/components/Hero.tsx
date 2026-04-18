@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { pizzasData, Pizza } from "../data/pizzas";
+import { menuData as pizzasData } from "../data/menuData";
 import Image from "next/image";
 import { ShoppingCart, User as UserIcon } from "lucide-react";
 import { useCartStore } from "../store/useCartStore";
@@ -12,6 +12,7 @@ import { ReservationModal } from "./ReservationModal";
 import { AuthModal } from "./auth/AuthModal";
 import { useAuth } from "../store/useAuth";
 import Link from "next/link";
+import { ProductOptionsSelector } from "./menu/ProductOptionsSelector";
 
 // Register ScrollTrigger
 if (typeof window !== "undefined") {
@@ -27,8 +28,9 @@ export function Hero() {
   const [isReservationOpen, setIsReservationOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { addItem } = useCartStore();
+  const [selectingProduct, setSelectingProduct] = useState<MenuItem | null>(null);
 
   useEffect(() => {
     const trigger = triggerRef.current;
@@ -83,16 +85,14 @@ export function Hero() {
       <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-between p-8 md:p-16 lg:px-24 py-12">
         
         {/* Header Area */}
-        <header className="flex justify-between items-center w-full pointer-events-auto">
-          <motion.div 
+        <header className="flex justify-center items-center w-full pointer-events-auto">
+          <motion.nav
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="font-poppins font-black text-2xl tracking-tighter"
+            className="hidden md:flex items-center gap-2 font-medium text-sm text-gray-600 bg-white/40 backdrop-blur-xl border border-white/50 px-3 py-2 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.05)]"
           >
-            ASOMBRO<span className="text-[var(--color-brand-orange)]">.</span>
-          </motion.div>
-          
-          <nav className="hidden md:flex gap-2 font-medium text-sm text-gray-600 bg-white/40 backdrop-blur-xl border border-white/50 px-2 py-2 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+            <Image src="/images/logo.svg" alt="Asombro Pizza" width={110} height={36} priority className="mr-2" />
+            <div className="w-px h-6 bg-gray-200 mx-1" />
             <a href="#menu" className="hover:text-black hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300">Menú</a>
             <a href="#promos" className="hover:text-[var(--color-brand-orange)] hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300 font-bold bg-white/60 shadow-sm">Promociones 🔥</a>
             <a href="#events" className="hover:text-[var(--color-purple-600)] text-purple-600 hover:bg-white/80 px-6 py-2 rounded-full transition-all duration-300 font-bold">Eventos 🎟️</a>
@@ -116,7 +116,7 @@ export function Hero() {
                 <UserIcon size={16} /> Ingresar
               </button>
             )}
-          </nav>
+          </motion.nav>
         </header>
 
         {/* Dynamic Text Content */}
@@ -143,11 +143,11 @@ export function Hero() {
                   <div className="flex flex-wrap items-center gap-4 md:gap-6 pointer-events-auto">
                     <span className="text-3xl font-bold font-poppins">${activePizza.price}</span>
                     <button 
-                      onClick={() => addItem(activePizza)}
+                      onClick={() => activePizza.config ? setSelectingProduct(activePizza) : addItem(activePizza)}
                       className="bg-black text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-semibold hover:bg-[var(--color-brand-orange)] hover:scale-105 transition-all flex items-center gap-2 shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_10px_20px_rgba(255,90,0,0.3)]"
                     >
                       <ShoppingCart size={20} />
-                      Ordenar ahora
+                      {activePizza.config ? "Elegir opciones" : "Ordenar ahora"}
                     </button>
                   </div>
                 </motion.div>
@@ -229,6 +229,14 @@ export function Hero() {
         isOpen={isAuthOpen} 
         onClose={() => setIsAuthOpen(false)} 
       />
+
+      {selectingProduct && (
+        <ProductOptionsSelector 
+          product={selectingProduct}
+          isOpen={!!selectingProduct}
+          onClose={() => setSelectingProduct(null)}
+        />
+      )}
     </section>
   );
 }

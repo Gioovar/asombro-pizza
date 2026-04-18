@@ -10,7 +10,7 @@ import Image from "next/image";
 export function CheckoutModal() {
   const { isCartOpen, toggleCart, items, updateQuantity, removeItem, getTotalPrice, appliedPromo } = useCartStore();
   const { user, token, setUser, addAddress, addPayment } = useUserStore();
-  const clearCart = () => items.forEach(i => removeItem(i.id));
+  const clearCart = () => items.forEach(i => removeItem(i.cartItemId));
 
   // Flow State
   // 1: Cart Items | 2: Identity & Dispatch | 3: Financial & Tip
@@ -141,17 +141,29 @@ export function CheckoutModal() {
                    {step === 1 && (
                      <div className="space-y-4">
                        {items.map((item) => (
-                         <div key={item.id} className="flex gap-4 items-center bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
+                         <div key={item.cartItemId} className="flex gap-4 items-center bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
                            <div className="relative w-20 h-20 bg-[var(--color-brand-marble)] rounded-2xl flex-shrink-0">
                               <Image src={item.image} alt={item.name} fill className="object-contain mix-blend-multiply p-2"/>
                            </div>
                            <div className="flex-1">
                              <h4 className="font-bold text-gray-800">{item.name}</h4>
+                             
+                             {/* Selected Options Display */}
+                             {item.selectedOptions && Object.keys(item.selectedOptions).length > 0 && (
+                               <div className="flex flex-wrap gap-1 mt-1">
+                                 {Object.entries(item.selectedOptions).map(([key, value]) => (
+                                   <span key={key} className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                                     {key}: {Array.isArray(value) ? value.join(", ") : value}
+                                   </span>
+                                 ))}
+                               </div>
+                             )}
+
                              <p className="text-sm font-black mt-1 text-[var(--color-brand-orange)]">${item.price * item.quantity}</p>
                              <div className="flex items-center gap-4 mt-3 bg-gray-50 w-fit rounded-full border border-gray-100 p-1">
-                               <button onClick={() => item.quantity === 1 ? removeItem(item.id) : updateQuantity(item.id, item.quantity - 1)} className="w-6 h-6 rounded-full hover:bg-gray-200 text-gray-600 flex items-center justify-center"><Minus size={14}/></button>
+                               <button onClick={() => item.quantity === 1 ? removeItem(item.cartItemId) : updateQuantity(item.cartItemId, item.quantity - 1)} className="w-6 h-6 rounded-full hover:bg-gray-200 text-gray-600 flex items-center justify-center"><Minus size={14}/></button>
                                <span className="text-sm font-bold w-4 text-center">{item.quantity}</span>
-                               <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-6 h-6 rounded-full hover:bg-gray-200 text-gray-600 flex items-center justify-center"><Plus size={14}/></button>
+                               <button onClick={() => updateQuantity(item.cartItemId, item.quantity + 1)} className="w-6 h-6 rounded-full hover:bg-gray-200 text-gray-600 flex items-center justify-center"><Plus size={14}/></button>
                              </div>
                            </div>
                          </div>
