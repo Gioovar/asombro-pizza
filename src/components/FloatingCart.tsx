@@ -74,7 +74,7 @@ export function FloatingCart() {
              
              {/* Subtext Tooltip (Visible on large screens) */}
              <div className="absolute top-full mt-4 bg-black text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 shadow-2xl border border-white/5 whitespace-nowrap">
-                Review My Cart <Zap size={8} className="inline ml-1 text-[var(--color-brand-orange)] fill-[var(--color-brand-orange)]" />
+                Ver Mi Canasta <Zap size={8} className="inline ml-1 text-[var(--color-brand-orange)] fill-[var(--color-brand-orange)]" />
              </div>
           </motion.button>
         )}

@@ -14,7 +14,7 @@ export async function GET() {
     });
     return NextResponse.json(orders);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch orders" }, { status: 500 });
+    return NextResponse.json({ error: "Error al obtener pedidos" }, { status: 500 });
   }
 }
 
@@ -30,6 +30,6 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json(order);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
+    return NextResponse.json({ error: "Error al actualizar pedido" }, { status: 500 });
   }
 }

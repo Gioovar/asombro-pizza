@@ -45,7 +45,7 @@ export function Header() {
               isStoreOpen ? 'bg-green-500' : 'bg-gray-300'
             }`}
           >
-            <span className="sr-only">Toggle Store Status</span>
+            <span className="sr-only">Cambiar Estado de Tienda</span>
             <span
               className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
                 isStoreOpen ? 'translate-x-5' : 'translate-x-0'
