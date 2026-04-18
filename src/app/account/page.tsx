@@ -10,6 +10,8 @@ import {
   ChevronLeft, MessageCircle,
 } from "lucide-react";
 import { QRCode } from "../../components/common/QRCode";
+import { AddressAutocomplete } from "../../components/common/AddressAutocomplete";
+
 
 type Tab = "profile" | "reservations" | "orders" | "tickets";
 
@@ -48,8 +50,11 @@ export default function AccountPage() {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [newAlias, setNewAlias] = useState("Casa");
   const [newAddr, setNewAddr] = useState("");
+  const [newLat, setNewLat] = useState<number | null>(null);
+  const [newLng, setNewLng] = useState<number | null>(null);
   const [newRef, setNewRef] = useState("");
   const [savingAddr, setSavingAddr] = useState(false);
+
 
   const fetchUser = async () => {
     try {
@@ -128,10 +133,11 @@ export default function AccountPage() {
     const res = await fetch("/api/client/addresses", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ alias: newAlias, fullPath: newAddr, ref: newRef, isDefault: isFirst }),
+      body: JSON.stringify({ alias: newAlias, fullPath: newAddr, ref: newRef, lat: newLat, lng: newLng, isDefault: isFirst }),
     });
     if (res.ok) {
-      setNewAlias("Casa"); setNewAddr(""); setNewRef("");
+      setNewAlias("Casa"); setNewAddr(""); setNewRef(""); setNewLat(null); setNewLng(null);
+
       setShowAddressForm(false);
       fetchUser();
     }
@@ -404,11 +410,16 @@ export default function AccountPage() {
                                   </button>
                                 ))}
                               </div>
-                              <input
-                                placeholder="Calle, número, colonia, ciudad"
+                              <AddressAutocomplete
                                 value={newAddr}
-                                onChange={e => setNewAddr(e.target.value)}
-                                className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-medium focus:ring-2 focus:ring-[var(--color-brand-orange)] outline-none"
+                                onChange={setNewAddr}
+                                onSelect={(s) => {
+                                  setNewAddr(s.fullPath);
+                                  setNewLat(s.lat);
+                                  setNewLng(s.lng);
+                                }}
+                                placeholder="Calle, número, colonia, ciudad"
+                                className="w-full"
                               />
                               <input
                                 placeholder="Referencias (entre qué calles, color de fachada...)"

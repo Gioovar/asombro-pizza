@@ -9,6 +9,8 @@ import { useAuth } from "../store/useAuth";
 import { useAuthGuardStore } from "../store/useAuthGuardStore";
 import { OrderTrackingModal } from "./OrderTrackingModal";
 import Image from "next/image";
+import { AddressAutocomplete } from "./common/AddressAutocomplete";
+
 
 export function CheckoutModal() {
   const { isCartOpen, toggleCart, items, updateQuantity, removeItem, getTotalPrice, appliedPromo } = useCartStore();
@@ -248,9 +250,17 @@ export function CheckoutModal() {
                         <div>
                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 block flex items-center gap-2"><MapPin size={16}/> ¿A dónde entregamos?</label>
                            <div className="relative">
-                              <input placeholder="Buscar en maps... ej: Calle 5, Reforma" value={tempAddress} onChange={e=>setTempAddress(e.target.value)} className="w-full pl-10 pr-4 py-4 bg-white border border-gray-200 rounded-2xl shadow-sm focus:border-black outline-none font-medium" />
-                              <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-black/40" />
-                              <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                              <AddressAutocomplete
+                                value={tempAddress}
+                                onChange={setTempAddress}
+                                onSelect={(s) => {
+                                  setTempAddress(s.fullPath);
+                                  setMapCoords({ lat: s.lat, lng: s.lng });
+                                }}
+                                placeholder="Buscar en maps... ej: Calle 5, Reforma"
+                                className="w-full"
+                              />
+                              <div className="absolute right-2 top-[7px] z-10">
                                 <button onClick={handleUseGPS} disabled={gpsLoading} className="bg-black text-white text-xs px-3 py-1.5 rounded-lg hover:bg-gray-800 transition-colors font-bold disabled:opacity-60">
                                 {gpsLoading ? "Localizando..." : "Usar GPS"}
                               </button>
