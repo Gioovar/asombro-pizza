@@ -19,7 +19,7 @@ interface CartStore {
   toggleCart: () => void;
   items: CartItem[];
   appliedPromo: PromoState | null;
-  addItem: (product: MenuItem, quantity?: number, options?: Record<string, any>) => void;
+  addItem: (product: MenuItem, quantity?: number, options?: Record<string, any>, finalPrice?: number) => void;
   updateQuantity: (cartItemId: string, quantity: number) => void;
   removeItem: (cartItemId: string) => void;
   getTotalPrice: () => number;
@@ -33,22 +33,19 @@ export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
   appliedPromo: null,
   
-  addItem: (product, quantity = 1, options = {}) => set((state) => {
-    // Unique ID for the cart item based on product and selected options
+  addItem: (product, quantity = 1, options = {}, finalPrice) => set((state) => {
     const cartItemId = `${product.id}-${JSON.stringify(options)}`;
-    
     const existing = state.items.find(i => i.cartItemId === cartItemId);
     if (existing) {
-       return { items: state.items.map(i => i.cartItemId === cartItemId ? { ...i, quantity: i.quantity + quantity } : i) };
+      return { items: state.items.map(i => i.cartItemId === cartItemId ? { ...i, quantity: i.quantity + quantity } : i) };
     }
-    
     const newItem: CartItem = {
       ...product,
+      price: finalPrice ?? product.price,
       quantity,
       selectedOptions: options,
-      cartItemId
+      cartItemId,
     };
-    
     return { items: [...state.items, newItem] };
   }),
   

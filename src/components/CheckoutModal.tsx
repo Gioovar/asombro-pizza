@@ -11,8 +11,8 @@ import Image from "next/image";
 
 export function CheckoutModal() {
   const { isCartOpen, toggleCart, items, updateQuantity, removeItem, getTotalPrice, appliedPromo } = useCartStore();
-  const { user, token, setUser, addAddress, addPayment } = useUserStore();
-  const { isAuthenticated } = useAuth();
+  const { user } = useUserStore();
+  const { isAuthenticated, user: authUser, token: authToken } = useAuth();
   const { openModal } = useAuthGuardStore();
   const clearCart = () => items.forEach(i => removeItem(i.cartItemId));
 
@@ -26,8 +26,6 @@ export function CheckoutModal() {
   const [orderSuccess, setOrderSuccess] = useState(false);
 
   // Sub-forms
-  const [authEmail, setAuthEmail] = useState("");
-  const [authName, setAuthName] = useState("");
   const [tempAddress, setTempAddress] = useState("");
   const [tempPayment, setTempPayment] = useState("");
   const [gpsLoading, setGpsLoading] = useState(false);
@@ -88,28 +86,17 @@ export function CheckoutModal() {
     setIsCheckingOut(true);
     try {
       const tipAmount = Math.round(getTotalPrice() * (selectedTip / 100));
-      
-      // Auto-register Anonymous on the fly for MVP tracking
-      if (!user && authEmail) {
-         await fetch("/api/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: authName || "Guest", email: authEmail, password: "temp123", phone: "000000000" })
-         }).then(res => res.json()).then(data => {
-            if (data.token) setUser(data.user, data.token);
-         });
-      }
 
       await fetch("/api/client/checkout", {
          method: "POST",
-         headers: { 
-            "Content-Type" : "application/json",
-            ...(token ? { "Authorization": `Bearer ${token}` } : {})
+         headers: {
+            "Content-Type": "application/json",
+            ...(authToken ? { "Authorization": `Bearer ${authToken}` } : {})
          },
          body: JSON.stringify({
             items,
             total: getTotalPrice(),
-            userId: useUserStore.getState().user?.id,
+            userId: authUser?.id,
             address: tempAddress || "Dirección Web",
             tip: tipAmount,
             paymentType: tempPayment
@@ -229,20 +216,17 @@ export function CheckoutModal() {
                         {/* Identidad */}
                         <div>
                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-3 block flex items-center gap-2"><UserCircle size={16}/> Tus Datos</label>
-                           {user ? (
-                              <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl flex items-center gap-3">
-                                 <div className="w-10 h-10 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">{user.name.charAt(0)}</div>
-                                 <div>
-                                   <p className="font-bold text-indigo-900">{user.name}</p>
-                                   <p className="text-xs text-indigo-500">{user.email}</p>
+                           {authUser ? (
+                              <div className="bg-[var(--color-brand-marble)] border border-gray-200 p-4 rounded-2xl flex items-center gap-3">
+                                 <div className="w-11 h-11 bg-[var(--color-brand-orange)] text-white rounded-full flex items-center justify-center font-black text-lg flex-shrink-0">
+                                   {authUser.name.charAt(0).toUpperCase()}
+                                 </div>
+                                 <div className="min-w-0">
+                                   <p className="font-bold text-gray-900 truncate">{authUser.name}</p>
+                                   <p className="text-xs text-gray-500 truncate">{authUser.email}</p>
                                  </div>
                               </div>
-                           ) : (
-                              <div className="space-y-3">
-                                 <input placeholder="Nombre completo" value={authName} onChange={e=>setAuthName(e.target.value)} className="w-full bg-white border border-gray-200 px-4 py-3 rounded-xl focus:border-indigo-500 outline-none font-medium" />
-                                 <input placeholder="Correo electrónico" type="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} className="w-full bg-white border border-gray-200 px-4 py-3 rounded-xl focus:border-indigo-500 outline-none font-medium" />
-                              </div>
-                           )}
+                           ) : null}
                         </div>
 
                         {/* Coordenadas Geográficas UI Simulator */}
