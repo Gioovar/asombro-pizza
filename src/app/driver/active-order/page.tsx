@@ -143,7 +143,7 @@ function ActiveOrderContent() {
             <div>
                <div className="flex items-center gap-2 mb-2">
                   <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${orderState === 'TO_RESTAURANT' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'}`}>
-                    {orderState === "TO_RESTAURANT" ? "Pickup" : "Entrega"}
+                    {orderState === "TO_RESTAURANT" ? "Recolección" : "Entrega"}
                   </span>
                </div>
                <h3 className="font-black text-3xl font-poppins tracking-tighter italic italic">

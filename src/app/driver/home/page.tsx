@@ -153,7 +153,7 @@ export default function DriverHome() {
                 
                 <div className="flex flex-col items-center">
                    <span className="font-black text-3xl tracking-tighter italic font-poppins">
-                     {isOnline ? "OFF" : "GO"}
+                     {isOnline ? "OFF" : "¡YA!"}
                    </span>
                    <Zap size={14} className={`mt-1 ${isOnline ? 'text-red-600' : 'text-[var(--color-brand-orange)] opacity-80'}`} fill="currentColor" />
                 </div>
