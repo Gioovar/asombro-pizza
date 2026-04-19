@@ -19,7 +19,8 @@ export async function POST(req: Request) {
         const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
         finalUserId = decoded.userId;
       } catch (e) {
-        console.warn("Invalid token in reservation attempt");
+        console.warn("Invalid token in reservation attempt:", e);
+        return NextResponse.json({ error: "Sesión expirada o inválida. Por favor, re-ingresa." }, { status: 401 });
       }
     }
 
@@ -79,9 +80,7 @@ export async function POST(req: Request) {
     }
 
     if (!finalUserId) {
-        // Fallback to demo guest from seed if nothing provided
-        const demoGuest = await prisma.user.findFirst({ where: { email: "webguest@asombropizza.com" } });
-        finalUserId = demoGuest?.id || undefined;
+        return NextResponse.json({ error: "No se pudo identificar al usuario para la reservación" }, { status: 401 });
     }
 
     // 4. Create Reservation

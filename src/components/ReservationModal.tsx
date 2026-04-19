@@ -12,7 +12,7 @@ interface ReservationModalProps {
 }
 
 export function ReservationModal({ isOpen, onClose }: ReservationModalProps) {
-  const { token, isAuthenticated } = useAuth();
+  const { token, user, isAuthenticated } = useAuth();
   const { openModal } = useAuthGuardStore();
   const [step, setStep] = useState(1);
   const [date, setDate] = useState("");
@@ -55,7 +55,7 @@ export function ReservationModal({ isOpen, onClose }: ReservationModalProps) {
           date,
           time,
           partySize,
-          email: "guest@asombropizza.com"
+          email: user?.email || "guest@asombropizza.com"
         })
       });
       
